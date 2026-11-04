@@ -2,10 +2,6 @@ name: Build and test Conda packages
 
 on:
   workflow_dispatch:
-  push:
-    paths:
-      - 'packaging/conda/**'
-      - '.github/workflows/conda.yml'
 
 permissions:
   contents: read
