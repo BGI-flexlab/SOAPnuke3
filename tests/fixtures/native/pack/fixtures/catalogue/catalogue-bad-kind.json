@@ -1,0 +1,13 @@
+{
+  "schema": "soapnuke-v3.resources/1",
+  "catalogue_version": "r79-test/1",
+  "resources": [
+    {
+      "id": "adapter-demo",
+      "kind": "database",
+      "path": "adapters.fa",
+      "sha256": "347a12d63d2125e1e76df4fe1d2cd4298dedb14f7f587dcaafafaf5bad250bfc",
+      "description": "authored adapter literal"
+    }
+  ]
+}

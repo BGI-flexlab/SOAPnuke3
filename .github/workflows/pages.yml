@@ -1,0 +1,52 @@
+name: Publish interactive guide
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'docs/interactive/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+      - name: Upload the guide
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: docs/interactive
+      - name: Deploy the guide
+        id: deployment
+        uses: actions/deploy-pages@v5
+      - name: Verify published files
+        timeout-minutes: 5
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+        run: |
+          mkdir -p .scratch/tmp/pages-check
+          export TMPDIR="$GITHUB_WORKSPACE/.scratch/tmp/pages-check"
+          for file in index.html SOAPnuke-guide.zip; do
+            curl --fail --location --silent --show-error \
+              --retry 5 --retry-delay 5 --retry-all-errors --max-time 20 \
+              "${PAGE_URL%/}/$file?commit=$GITHUB_SHA" \
+              --output ".scratch/tmp/pages-check/$file"
+            cmp "docs/interactive/$file" ".scratch/tmp/pages-check/$file"
+            sha256sum ".scratch/tmp/pages-check/$file"
+          done

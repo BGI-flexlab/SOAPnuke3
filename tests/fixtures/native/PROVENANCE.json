@@ -1,0 +1,118 @@
+{
+  "schema": "repository-native-fixtures/1",
+  "data_kind": "authored computational truth; no experimental sequencing claim",
+  "rows": [
+    {
+      "destination": "tests/fixtures/native/header/catalogue-a.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "2dd6fa080e69de7d9a6d8795f6dc1a18635d14d5b778f6bab309089da9902966",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/header/catalogue-b.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "37cef2352f42dcc84598d7891d7dd8409c86d5763ab20dd912a9051ced33795c",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/header/literal.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "794fbcba6b1426b243d0c514193bca5ca31914a8602fe9600fc9b34ad534b679",
+      "transformation": "expected catalogue paths replaced with runtime-root token only"
+    },
+    {
+      "destination": "tests/fixtures/native/control-inmemory.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "62eb10a89d8122997d4cc83c43c8215335c8a166a58b97bc390294117ec2b8e9",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/control-spill.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "62eb10a89d8122997d4cc83c43c8215335c8a166a58b97bc390294117ec2b8e9",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/control-order.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "62eb10a89d8122997d4cc83c43c8215335c8a166a58b97bc390294117ec2b8e9",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/pack/fixtures/catalogue/adapters-r2.fa",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "1588ea4e8005b74a7c9f2d1413e8d0f1ba24131f2f97ba6cafd3b33e05e7b74c",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/pack/fixtures/catalogue/adapters.fa",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "347a12d63d2125e1e76df4fe1d2cd4298dedb14f7f587dcaafafaf5bad250bfc",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/pack/fixtures/catalogue/catalogue-wrong-hash.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "4f1a700d147cae3da506f1dcfd9efb051d1820901afcd2c75d14e2bb8daf2658",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/pack/fixtures/catalogue/catalogue-duplicate-id.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "2760296f72ca0e638aa810a9943b3a0fc9e5af207b57378b4c65467bb1f71172",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/pack/fixtures/catalogue/catalogue-bad-schema.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "8ce2a3538d871be3817c162aca4ddfef309d538e0880807988b548cfd7ad8d9f",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/pack/fixtures/catalogue/reference.fa",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "01fc86a57f692aa26feb67c742349415ef5cde9161bd1e1157f96d16fdd09c34",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/pack/fixtures/catalogue/resources.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "fd3968d7fe7cb233e0082e1276594e7317871825d38a957ebb083774cd0713a9",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/pack/fixtures/catalogue/catalogue-bad-kind.json",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "af30b2e8de550407221ec9e52f4047e6e0d92607d39e941b11686c8d337a0ee3",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/pack/fixtures/adapter-resource-id/input.R1.fastq",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "27f7a321fbb43ca427a39e0109e6bd25b8649707cd870f5d9b3326f1f0b4fd2b",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/pack/fixtures/reference-resource-id/input.R1.fastq",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "a47f938c641a47329d8eb5d19b0826aad4e4040d7d26395e665ccaa10d2c7e48",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/dedup-se/input.R1.fastq",
+      "source_family": "retained reviewed computational fixture",
+      "source_sha256": "6d0584bdbc183af5325c0e1d9faa54a0b81ed1c33fd3df2cf696331bc475bd0b",
+      "transformation": "none"
+    },
+    {
+      "destination": "tests/fixtures/native/normal-*.json",
+      "source_family": "reviewed R84 literal/QC expected subset and retained baseline report/command",
+      "source_sha256": {
+        "normal-expected.json": "b47760c0a9382e49e92ae5e0455d7aebbd09d0f3e1143bface13cab7d790d108",
+        "command.json": "859d7e927bbffb601a795745c7094d206ef54d3e63e8b1de2891711b35a6341f",
+        "report.json": "51d5bf1ffac3b32e4e45ea81e463c2b241caf6d6ef29790292e26299051d342d"
+      },
+      "transformation": "replace input/output paths with explicit runtime tokens; strip previously comparator-excluded identity/measurements/execution fields except decoder facts; change report schema from /1 to /2 and top-level phase3 to dedup; preserve report/QC/records assertions"
+    }
+  ]
+}

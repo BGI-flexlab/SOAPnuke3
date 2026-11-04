@@ -1,0 +1,91 @@
+{
+  "schema": "soapnuke-release-validation/1",
+  "release": "3.0.0",
+  "status": "validated",
+  "platform": "Linux x86-64",
+  "rustc": "1.99.1",
+  "build_id": "soapnuke-3.0.0",
+  "binary_sha256": "17f371826e6b7435a8c017bc95f7762838486f21892e0303451e4b606e0831c8",
+  "source_manifest_sha256": "709cb22cbfbb53d057154097e0d649ef0f06b0dc25c78762b0f4dd7af158e813",
+  "dependency_manifest_sha256": "63b5e803a04d319174dde2a05de13827688ec1658a0761aa13c5a090d7a61af4",
+  "native_tests": {
+    "regular_passed": 318,
+    "separate_smoke_passed": 1,
+    "smoke_seconds": 120
+  },
+  "cli": {
+    "process_calls_passed": 49,
+    "module_and_help_calls_passed": 24,
+    "adapter_overlap_focused_cases": "passed"
+  },
+  "api": {
+    "owned_examples_passed": 2,
+    "linked_caller_definitions_passed": 30
+  },
+  "real_data": {
+    "distinct_pairs": 600000,
+    "calls": 12,
+    "accessions": [
+      "SRR37356337",
+      "SRR24511772",
+      "ERR15897279"
+    ],
+    "selection": "first100000 and next100000 complete pairs per library",
+    "checks": [
+      "exact FASTQ bytes",
+      "complete numeric QC populations",
+      "filter disposition",
+      "adapter-overlap counters"
+    ],
+    "reference_executable_sha256": "697c0c78443e5fb542b1b2b25eb8e8e2896dd99429b193c57d56cd3c28cf484d",
+    "status": "passed"
+  },
+  "resources": {
+    "calls_passed": 8,
+    "layouts": [
+      "SE",
+      "PE"
+    ],
+    "threads": [
+      16,
+      32
+    ],
+    "input_units_per_call": 32000000,
+    "input_kind": "authored gzip control cohort",
+    "peak_RSS_gate": "formal <= reference + max(10% reference,16 MiB)",
+    "absolute_RSS_limit_MiB": 2048,
+    "statistics_limit_MiB": 128,
+    "chunks_plus_prefetch_limit_MiB": 512,
+    "timeout_seconds": 600,
+    "minimum_duration_seconds": 5,
+    "scope": "one paired check per cell; no performance estimate"
+  },
+  "named_exports": {
+    "CLI_profiles_passed": 18,
+    "API_profiles_passed": 18,
+    "actual_consumer_calls_passed": 14,
+    "qualified_CLI_followups_passed": 7,
+    "qualified_API_followups_passed": 7,
+    "MultiQC": "1.27.1",
+    "RawR_commit": "f781cef13b5448eaf3673a5d82550d0267086480",
+    "scope": "pinned custom-content/parser and input-table compatibility"
+  },
+  "guide": {
+    "browser": "Chromium via Playwright",
+    "operation_panels_checked": 25,
+    "checks": [
+      "paired overlap off/on",
+      "single-end unavailable state",
+      "mobile layout",
+      "no JavaScript errors",
+      "no external requests",
+      "offline ZIP matches HTML"
+    ]
+  },
+  "limitations": [
+    "Nonrandom real-data prefixes; not full-library prevalence",
+    "No downstream biological accuracy claim",
+    "Resource smoke is not a new performance/scaling campaign"
+  ],
+  "evidence_retention": "Detailed commands, immutable outputs, source manifests and consumer receipts are retained in the project Linux workspace; this public summary contains no private file paths."
+}

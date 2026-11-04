@@ -1,0 +1,80 @@
+{
+  "schema": "soapnuke-dependency-integration/1",
+  "integration_files": {
+    ".cargo/config.toml": "77e9219c27274120197571fd165cbe4121963b5ad3bc0b20b383c86ef0ce6c2b",
+    "soapnuke-rs/Cargo.lock": "84ce66d525f5d3bf00093fe1d710cfa66e96faf535aab1c69fed4fab71dcb2b8",
+    "soapnuke-rs/third_party/rapidgzip/PINNED_COMMITS.tsv": "ae4da06d1e6bb35b7752cfadcc38ef947e52cb941dba88a301fca96a7ec70eb8",
+    "soapnuke-rs/src/rapidgzip_adapter.h": "1a927827d8f5cfda22a4a18819df126d395eabbf3b6fed95a1cbf0f0ce69e792",
+    "soapnuke-rs/src/rapidgzip_adapter.cpp": "dc9bb3118436f8ac72bac40d1bf3b2ae6fef4779368b678ff1e21d31c360face",
+    "soapnuke-rs/src/ffi.rs": "edda9b6004ce7f220f3ab0da87adaed1969926da7ecbaea7b941e235272df1f3",
+    "soapnuke-rs/src/rapidgzip_reader.rs": "abafde804e38d236c320e220f32e8844cd00f929c56fd12160df4fe592c18e46",
+    "vendor/serde_json/src/de.rs": "15579816326a87eecab8fbe5e7b2dca420f37a2df073481e6344a2d3b8e65810",
+    "vendor/serde_json/.cargo-checksum.json": "77caee65f7be6f15e6c782732dc316d6682bf13f420187e7553dd4f8ffbfb840"
+  },
+  "locked_packages": {
+    "itoa": {
+      "name": "itoa",
+      "version": "1.0.18",
+      "checksum": "8f42a60cbdf9a97f5d2305f08a87dc4e09308d1276d28c869c684d7777685682"
+    },
+    "memchr": {
+      "name": "memchr",
+      "version": "2.8.3",
+      "checksum": "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
+    },
+    "proc-macro2": {
+      "name": "proc-macro2",
+      "version": "1.0.107",
+      "checksum": "985e7ec9bb745e6ce6535b544d84d6cd6f7ad8bd711c398938ae983b91a766d9"
+    },
+    "quote": {
+      "name": "quote",
+      "version": "1.0.47",
+      "checksum": "1fbf4db142a473a8d80c26bbf18454ed458bf8d26c8219c331daecfdbd079001"
+    },
+    "serde": {
+      "name": "serde",
+      "version": "1.0.229",
+      "checksum": "4148590afebada386688f18773da617792bf2ef03ffc1e4cbd2b1d45b023e0ba"
+    },
+    "serde_core": {
+      "name": "serde_core",
+      "version": "1.0.229",
+      "checksum": "67dca2c9c51e58a4791a4b1ed58308b39c64224d349a935ab5039aa360942a48"
+    },
+    "serde_derive": {
+      "name": "serde_derive",
+      "version": "1.0.229",
+      "checksum": "e7a5d71263a5a7d47b41f6b3f06ba276f10cc18b0931f1799f710578e2309348"
+    },
+    "serde_json": {
+      "name": "serde_json",
+      "version": "1.0.154",
+      "checksum": "e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6"
+    },
+    "syn": {
+      "name": "syn",
+      "version": "3.0.9",
+      "checksum": "d78c8dee4c7bf0e14673097256fed6142ce9d3b85a408189d07482442145823b"
+    },
+    "unicode-ident": {
+      "name": "unicode-ident",
+      "version": "1.0.27",
+      "checksum": "a2c754d6c33795a1c324727428e5a7dedb5b06195f9890bdbcba760d3e246563"
+    },
+    "zmij": {
+      "name": "zmij",
+      "version": "1.0.23",
+      "checksum": "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"
+    }
+  },
+  "dependency_manifest": "tests/dependency-manifest.json",
+  "local_patch": {
+    "path": "vendor/serde_json/src/de.rs",
+    "upstream_package": "serde_json 1.0.154",
+    "upstream_registry_checksum": "e7e9cc8b1b85264074fbcc02a88680c4096b1e47df8f739dceb03bf482f04bd6",
+    "hook_sha256": "2a4369b5320b360bd91f68d01c1c1308732d26d9da4fa663c8b5b205ab9612ec",
+    "upstream_vcs": "20572a6d066958542d79cdd6cf1a7cd9f0c8e1f8",
+    "origin": "retained byte-for-byte from the reviewed 3.1.1 source; no dependency upgrade"
+  }
+}

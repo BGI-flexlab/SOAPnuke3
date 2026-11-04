@@ -1,0 +1,312 @@
+SOAPnuke 3.0.0 process - FASTQ processing and quality control
+
+Usage:
+  SOAPnuke process -1 FILE [-2 FILE] -C FILE [-D FILE] -o DIR [options]
+  SOAPnuke process -1 FILE [--r2 FILE] --qc-only -o DIR [options]
+  SOAPnuke process --r1 FILE --out1 FILE --report FILE [options]
+
+Start here:
+  -1 is the SE input or mate 1; -2 adds mate 2. PE means paired-end.
+  -C/-D name the clean outputs; -o sets their existing output directory.
+  With -o, the default JSON report is SOAPnuke.json inside that directory.
+  Without -o, output paths use the working directory; --report is required.
+  Input names ending in .gz select gzip. One unit is one read or pair.
+
+Migrating from v1/v2:
+  Familiar flags and existing v3 names select the SAME v3 processing rules.
+  Filters are off until enabled; minimum length is 1; adapters trim by default.
+  Quality encoding defaults to Phred+33. Low quality means Q < -l; a read
+  fails only when its low-quality fraction > -q or its N fraction > -n.
+  Equality passes these fraction limits. These defaults/boundaries differ
+  from v1/v2. Choose thresholds explicitly when migrating existing jobs.
+
+Input and configuration:
+  -1, --fq1 FILE                Input FASTQ, plain or gzip; '-' for stdin.
+                                Also --r1.
+  -2, --fq2 FILE                Mate 2 FASTQ for paired-end processing.
+                                Also --r2.
+  --interleaved [BOOL]          Read alternating R1/R2 from --r1. [false]
+  --lanes TSV                   Read lanes in TSV order: lane_id, r1, r2.
+                                Use tab separators; leave r2 empty for SE.
+                                Paths are relative to the TSV directory.
+                                Requires --sample-id; excludes --r1/--r2.
+  --input-format FORMAT         auto, fastq, gzip. [auto]
+  --input-phred INT             Input quality encoding: 33 or 64. [33]
+  -Q, --qualSys INT             Input encoding: 1 means Phred+64; 2 means +33.
+                                Equivalent to --input-phred 64 or 33.
+  --limit-units INT             Read only the first INT units. [all]
+  --sample-id TEXT              Report sample name. [input filename]
+                                Required with stdin or --lanes.
+  --config JSON                 Load {"job":"process","options":{...}}.
+                                CLI overrides config; config overrides
+                                defaults.
+
+Main output:
+  -o, --outDir DIR              Existing directory for relative output paths.
+                                Also --out-dir. Absolute paths stay absolute.
+                                Inputs/resources still use the working
+                                directory.
+  -C, --cleanFq1 FILE           Clean SE reads or clean mate 1.
+                                Also --out1.
+  -D, --cleanFq2 FILE           Clean mate 2; use with --out1 for PE.
+                                Also --out2.
+  --out-interleaved FILE        Write alternating R1/R2 instead of out1/out2.
+  --output-format FORMAT        auto, fastq, gzip. [auto, based on suffix]
+  --output-phred INT            Output quality encoding: 33 or 64. [33]
+  --outQualSys INT              Output encoding: 1 means Phred+64; 2 means +33.
+  -G                            Output Phred+33; same as --output-phred 33.
+  --gzip-level INT              Gzip compression level, 1..9. [4]
+                                Set explicitly only for gzip output.
+
+Reports and QC:
+  Repetition/overrepresentation describe exact sequences in the observed
+  first N input units. PE keys keep mate order; case is ignored. They do not
+  identify PCR duplicates, and this prefix need not represent the full file.
+  --report FILE                 JSON QC report and final job status.
+                                Default with -o: SOAPnuke.json. Otherwise
+                                required.
+  --html-report FILE            Also write an HTML QC summary. [off]
+  --qc-only [BOOL]              Compute QC without filtering or FASTQ output.
+                                No trimming or selection options. [false]
+  --repetition [BOOL]           Count exact repeated reads/pairs in an input
+                                prefix; does not remove duplicates. [false]
+  --repetition-units INT        Prefix size for repetition analysis. [100000]
+  --overrep-fraction FLOAT      Report prefix sequences above this fraction,
+                                0..1; requires --repetition. [off]
+  --progress-seconds INT        Progress interval on stderr; 0 disables
+                                periodic updates, not the final event. [10]
+  --metrics BOOL                Include runtime metrics: true or false. [true]
+
+Threads and memory:
+  --memory-mib covers additional managed buffers, not total peak RSS.
+  --metrics reports scoped in-process observations, not whole-command timing.
+  -T, --thread INT              Worker budget, up to available CPU limit.
+                                Also --threads.
+                                Default: 8, or the CPU limit if smaller.
+  --decoder MODE                auto, zlib, rapidgzip. [auto]
+                                Explicit rapidgzip needs a seekable gzip file
+                                and at least 14 threads; stdin uses zlib.
+  --memory-mib INT              Additional managed-buffer limit in MiB.
+                                This is not a limit on total process memory.
+
+Adapter trimming:
+  Ordinary SE and PE both support 3' trimming. A 3' match can be internal:
+  remove the match and everything to its right. A 5' match is start-anchored.
+  Matching permits substitutions, not insertions/deletions. This is not
+  Cutadapt's -b behavior. At most one 5' then one 3' match is cut per mate.
+  Optional --adapter-overlap uses a unique full mate overlap to locate both
+  3' adapter tails; it is OFF by default. It needs PE, trim action and
+  supplied 3' adapters for both mates. At least 30 canonical insert bases
+  must agree within 2% and at most three mismatches across the entire insert.
+  Both exposed tails must match a supplied adapter prefix: 1-2 bases exactly,
+  longer tails with at most one mismatch per ten bases. Competing overlaps
+  abstain; ordinary adapter matching still runs. This conservative first
+  version never replaces an earlier ordinary adapter cut with a later one.
+  It excludes read-start-changing operations before adapters: positive
+  fixed head cuts, capture removal/retention, 5' adapters, or quality ends/Mott
+  ordered before adapters. Tail-only trims remain supported. A pair with only
+  one exposed adapter tail is left to ordinary adapter matching.
+  Overlap-assisted clipping uses fixed thresholds, separate from
+  --adapter-min-overlap and --adapter-max-error (ordinary adapter matching),
+  and --overlap-min and
+  --overlap-max-error (later PE correction/merge). They are conservative
+  rules, not proven optimal thresholds.
+  -f, --adapter1 SEQ            Mate 1 / SE 3' adapter; may be repeated.
+                                Also --adapter3-r1. Sequence only; files use
+                                --adapter-file.
+  -r, --adapter2 SEQ            Mate 2 3' adapter; may be repeated.
+                                Also --adapter3-r2. Sequence only; files use
+                                --adapter-file.
+  --adapter5-r1 SEQ             Mate 1 / SE anchored 5' adapter; repeatable.
+  --adapter5-r2 SEQ             Mate 2 anchored 5' adapter; repeatable.
+  --adapter-file FASTA          Load named adapters; may be repeated.
+                                Header example: >adapter1;mate=R1;end=3
+  --resource-catalog JSON       Optional local catalogue for id:ID adapter
+                                files or screen references. Direct paths
+                                still work; no default catalogue/download.
+  -J, --ada_trim                Select adapter trimming (already the default).
+                                Also -E/--cutAdaptor; no value is accepted.
+  --adapter-action ACTION       trim or discard matching reads. [trim]
+  --adapter-min-overlap INT     Minimum matched overlap in bases. [3]
+  --adapter-max-error FLOAT     Maximum mismatch fraction, 0..1. [0.1]
+  --adapter-overlap [BOOL]      Clip PE adapter tails only with unique full
+                                overlap and both supplied tail matches. [false]
+  --infer-adapter MATES         Infer 3' adapters: off, r1, r2, both. [off]
+  --infer-units INT             Input prefix used for inference. [100000]
+  --infer-min-support FLOAT     Minimum inference support, 0..1. [0.01]
+  --match-report FILE           Write a bounded adapter-match audit. [off]
+  --match-limit INT             Maximum audit rows; needs --match-report.
+                                [1000]
+
+Other trimming:
+  mott keeps the contiguous interval with largest positive sum(Q - cutoff).
+  Ties prefer earliest end, then earliest start; no positive sum keeps none.
+  This Mott-style interval rule is not BWA trimming or Trimmomatic MAXINFO.
+  -t, --trim COUNTS             Fixed cuts: HEAD,TAIL for SE; H1,T1,H2,T2 for
+                                PE.
+                                Same operation as --cut-r1 and --cut-r2.
+  --cut-r1 HEAD,TAIL            Remove fixed bases from mate 1 / SE. [0,0]
+  --cut-r2 HEAD,TAIL            Remove fixed bases from mate 2. [0,0]
+  --quality-mode MODE           off, ends, window, mott. [off]
+  --quality-q INT               Quality threshold, 0..93; required when
+                                enabled.
+  --quality-window INT          Window size in bases; window mode only. [4]
+  --tail-bases BASE             Trim terminal runs: off, A, C, G, T, N, all.
+                                [off]
+  --tail-min INT                Minimum terminal run length in bases. [10]
+  --stage-order LIST            Order after fixed cuts; use each stage once.
+                                Default: tails,quality,adapters
+
+Read filtering (after trimming):
+  -4, --minReadLen INT          Minimum read length in bases. [1]
+                                Also --min-length or --minLen.
+  --maxReadLen INT              Maximum read length in bases. [off]
+                                Also --max-length.
+  --max-n-count INT             Maximum number of N bases. [off]
+  -n, --nRate FLOAT             Maximum fraction of N bases, 0..1. [off]
+                                Also --max-n-fraction; rejects strictly above
+                                the limit.
+  -l, --lowQual INT             Low-quality base threshold, Phred 0..93.
+                                Also --low-q; counts bases strictly below the
+                                threshold.
+                                Use with --max-low-q-fraction. [off]
+  -q, --qualRate FLOAT          Maximum low-quality fraction, 0..1. [off]
+                                Also --max-low-q-fraction; use with -l.
+  -m, --mean FLOAT              Minimum mean Phred score, 0..93. [off]
+                                Also --min-mean-q.
+  --min-complexity FLOAT        Minimum adjacent-base change fraction, 0..1.
+                                Counts all adjacent changes, including N.
+                                Length <=1 fails; cutoff equality passes. [off]
+  --pair-policy POLICY          both-pass, either-pass, r1-pass. [both-pass]
+                                Controls ordinary mate filtering; explicit
+                                reference/insert rejection still rejects a
+                                pair.
+
+Paired-end overlap, correction and merging:
+  --overlap-min INT             Minimum overlap in bases. [20]
+  --overlap-max-error FLOAT     Maximum overlap mismatch fraction, 0..1. [0.1]
+  --min-insert-length INT       Reject confidently shorter inserts. [off]
+                                Pairs without a usable overlap are not
+                                rejected.
+  --correct-overlap [BOOL]      Correct mismatches: one Q>=30, other Q<=14.
+                                Copy the stronger base and its quality. [false]
+  --merge [BOOL]                Merge overlapping pairs; needs --merged-out.
+                                Keep R1 bases/qualities through the overlap,
+                                then append the reverse-complemented R2 tail.
+                                Merging includes Q30/Q14 correction first.
+                                Correction and merging need both-pass. [false]
+  --merged-out FILE             Output merged reads. [off]
+  --unmerged-mode MODE          paired: write to mate outputs; discard: omit
+                                unmerged pairs. [paired]
+
+Labels and retained regions (original read coordinates):
+  --extract-label SPEC          Capture a UMI/barcode; may be repeated.
+                                Format: name@r1:start:length; r2 also
+                                supported.
+                                Coordinates start at 1, before trimming.
+  --label-kind KIND             umi or barcode. [umi]
+  --label-remove [BOOL]         Remove captured bases from processed reads.
+                                [false]
+  --label-min-q INT             Minimum captured-base quality, 0..93. [off]
+  --label-max-n INT             Maximum N bases in a captured label. [0]
+  --retain-r1 REGION            Keep START:END (inclusive) or all. [all]
+  --retain-r2 REGION            Mate 2 region, START:END or all. [all]
+
+Reference screening (optional):
+  kmer-exact counts distinct exact A/C/G/T words on either strand; it is not
+  an aligner and allows no mismatches. N-containing windows cannot match.
+  supplied-hits applies decisions you generated externally in a bound TSV;
+  SOAPnuke neither generates that TSV nor runs an external screening tool.
+  --screen-reference FASTA      Reference sequence file; may be repeated.
+  --screen-method METHOD        off, kmer-exact, supplied-hits.
+                                Default: kmer-exact with a reference; off
+                                without.
+  --screen-action ACTION        inspect, remove, retain. [inspect]
+                                Inspect only reports; remove/retain filter
+                                reads.
+  --screen-k INT                Exact k-mer length for native screening. [31]
+  --screen-min-hits INT         Minimum distinct matching k-mers per reference.
+                                [2]
+  --screen-pair POLICY          Pair is a hit if any or both mates hit. [any]
+  --screen-unscorable POLICY    keep or reject reads that cannot be scored.
+                                Required explicitly for remove/retain.
+  --screen-hits TSV             Existing hits for supplied-hits; also requires
+                                TSV.provenance.json bound to original inputs.
+                                No external screening tool is run
+                                automatically.
+
+Small-RNA profile (single-end only):
+  Only srna requires a 3' adapter hit and checks the insert before it.
+  Ordinary SE/PE still trim 3' adapters, but do not reject a missing hit.
+  The srna insert minimum detects short inserts, not a general dimer class.
+  --profile NAME                ordinary or srna. [ordinary]
+                                srna requires an explicit 3' adapter and trim.
+  --srna-min-insert INT         Minimum insert before the 3' adapter. [1]
+  --srna-reject5 [BOOL]         Reject 5' adapter matches; needs adapter5-r1.
+                                [false]
+  --srna-reject-poly-a [BOOL]   Reject poly-A runs using --tail-min. [false]
+  The srna profile uses its own trimming flow. Do not combine it with cuts,
+  quality/tail trimming, label capture, inference, or reference filtering.
+
+Sampling and splitting (accepted output only):
+  Sampling keeps accepted reads/pairs by seed and original input position.
+  The fraction gives an expected share, not an exact count or first-N prefix.
+  Input and accepted QC stay unchanged; written QC describes what is kept.
+  --sample-fraction FLOAT       Fraction of accepted units to keep, 0..1. [1]
+  --sample-seed INT             Unsigned 64-bit sampling seed. [0]
+                                Set explicitly only with sample-fraction < 1.
+  -w, --cleanOutSplit INT       Maximum units per output chunk. [off]
+                                Also --split-units or --output_clean.
+                                Main output paths must contain '{chunk}'.
+                                Pair mates stay together; stdout cannot split.
+
+Additional FASTQ outputs (not sampled or split):
+  --reject1 FILE                Rejected mate 1 / SE reads. [off]
+  --reject2 FILE                Rejected mate 2. [off]
+  --transformed1 FILE           Completed transformed mate 1 / SE reads. [off]
+  --transformed2 FILE           Completed transformed mate 2. [off]
+  --singleton1 FILE             Passing mate 1 when mate 2 fails. [off]
+  --singleton2 FILE             Passing mate 2 when mate 1 fails. [off]
+  Rejected reads reflect completed trimming; fallback reads stay original.
+  In PE mode, request both paths in each output family. Singleton outputs
+  require both-pass. A companion manifest maps outputs to original units.
+
+Files and conventions:
+  Values in [brackets] are defaults; [off] means not enabled by default.
+  [BOOL] options can be used alone or followed by true/false; --metrics
+  always needs a value. Short values may be attached (-T16), separated
+  (-T 16), or use '=' (-T=16). Long options also accept --name=value.
+  Do not supply two spellings of the same scalar option; this is an error.
+  Repeatable adapter options accept mixed spellings and preserve order.
+  JSON config uses canonical v3 keys (r1, threads, etc.), without dashes.
+  -c/--configFile and -L are ambiguous between v1/v2 and are not accepted.
+  Use --config for v3 JSON; legacy key=value config files are unsupported.
+  Unsupported old functions are rejected; no legacy engine is selected.
+  Use new output paths in existing directories, on the same filesystem as
+  the JSON report. Existing files are not overwritten.
+  Stdin needs --sample-id. Stdout supports one SE/interleaved output with
+  --output-format fastq; it cannot be rolled back. Always use a named report.
+  Input reads support A/C/G/T/N, up to 1000 bases per read and 1 MiB/record.
+
+Examples:
+  # Paired-end gzip, 16 threads; JSON report is results/SOAPnuke.json
+  mkdir -p results
+  SOAPnuke process -1 reads_R1.fq.gz -2 reads_R2.fq.gz \
+    -C clean_R1.fq.gz -D clean_R2.fq.gz -o results -T 16
+
+  # Explicit quality filters; v3 uses Q < 20, low fraction > 0.2, N > 0.05
+  mkdir -p filtered
+  SOAPnuke process -1 reads_R1.fq.gz -2 reads_R2.fq.gz \
+    -C clean_R1.fq.gz -D clean_R2.fq.gz -o filtered \
+    -l 20 -q 0.2 -n 0.05 -4 30 -T 16
+
+  # Single-end adapter trimming
+  SOAPnuke process -1 reads.fq.gz -f AGATCGGAAGAGC -J \
+    -4 30 -C clean.fq.gz --report sample.qc.json
+
+  # QC reports only; mixed familiar and existing v3 spellings work
+  SOAPnuke process --r1 reads.fq.gz --qc-only -T 16 \
+    --report sample.qc.json --html-report sample.qc.html
+
+  -h, --help                    Show this option reference.
+  -v, --version                 Show version and build identity.

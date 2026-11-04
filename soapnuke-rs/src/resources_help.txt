@@ -1,0 +1,52 @@
+
+Usage:
+  SOAPnuke resources list --resource-catalog JSON
+  SOAPnuke resources show ID --resource-catalog JSON
+  SOAPnuke resources verify ID --resource-catalog JSON
+
+Start here:
+  Resources are local adapter/reference FASTA files, not sequencing reads.
+  A catalogue gives those files reusable names such as id:adapter-demo.
+  Processing can use direct files instead; a catalogue is optional there.
+  These three resources commands require an explicit catalogue.
+  No catalogue is chosen implicitly, and no files or databases are downloaded.
+
+Actions:
+  list                          Display all resource declarations; no ID.
+  show ID                       Display one resource declaration.
+  verify ID                     Check that resource's file, kind, SHA256 and
+                                FASTA format, then display its declaration.
+                                list/show do not verify file content.
+
+Catalogue:
+  --resource-catalog JSON       Required local soapnuke-v3.resources/1 file.
+                                No default catalogue.
+                                Resource paths inside it are relative to the
+                                catalogue's directory unless absolute.
+
+Help:
+  -h, --help                    Show this help.
+  -v, --version                 Show the package version.
+
+Examples:
+  SOAPnuke resources list --resource-catalog resources.json
+  SOAPnuke resources show adapter-demo --resource-catalog resources.json
+  SOAPnuke resources verify adapter-demo --resource-catalog resources.json
+  SOAPnuke process --r1 reads.fq.gz --out1 NEW_clean.fq.gz \
+    --report NEW_process.json --resource-catalog resources.json \
+    --adapter-file id:adapter-demo
+
+The example catalogue must declare adapter-demo and its actual FASTA digest.
+The release's examples/resources directory contains tiny authored examples,
+not a default database; see docs/RESOURCES.md for tested absolute paths.
+
+A catalogue has schema "soapnuke-v3.resources/1" and a resources array. Each
+row needs a unique id, kind (adapter or reference), path and lowercase sha256.
+Optional catalogue_version and description remain unavailable when absent.
+Adapter headers use >name;mate=R1;end=3 (R1/R2 and 3/5 are supported).
+
+Process --adapter-file and --screen-reference accept direct paths or id:ID.
+Sequence-valued --adapter3-r1/r2 are sequences, not resource IDs. Prefix a
+literal filename beginning id: with ./ . Unknown IDs, duplicate IDs, wrong
+schema/kind, missing files, invalid FASTA and mismatched digests fail.
+See docs/RESOURCES.md for catalogue creation and direct-file examples.

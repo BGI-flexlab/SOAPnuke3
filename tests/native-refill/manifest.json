@@ -1,0 +1,96 @@
+{
+  "generator": "Python stdlib gzip.compress(mtime=0), independent byte-pattern/FASTQ literal recipes",
+  "files": {
+    "bytes-1048575.gz": {
+      "bytes": 4402,
+      "sha256": "811503904371aa88a802b014d49e8db9c03cf4cca1ac19e56a22e44e6a7d19dd",
+      "expected_decoded_bytes": 1048575,
+      "expected_decoded_sha256": "8b55c6a2d3444092a316985030e00c1e6f8608eaf912c896dee7c374d440ed11",
+      "scope": "valid gzip"
+    },
+    "bytes-1048576.gz": {
+      "bytes": 4402,
+      "sha256": "651bdd69565aead79560f011da38084d95224989ae37e428fd3f7d04376bb993",
+      "expected_decoded_bytes": 1048576,
+      "expected_decoded_sha256": "631b84027d6b9e52b539c4e8373622d23032dfadc64d60af87339c9037e4f769",
+      "scope": "valid gzip"
+    },
+    "bytes-1048577.gz": {
+      "bytes": 4402,
+      "sha256": "44d358fac6ee21c1dcfb0e996efc9619d4e5023a7916f2fd8d90526b9bc45579",
+      "expected_decoded_bytes": 1048577,
+      "expected_decoded_sha256": "5769f52bc3eef28afa39c6fc68cadb7d0bd69812ae3a3d71452f519ec3c7aa56",
+      "scope": "valid gzip"
+    },
+    "bytes-2097189.gz": {
+      "bytes": 8466,
+      "sha256": "d6d854cd5f5b6ed7a947e11dd1756ec6a78c989c681ffb4d66b0a9d44238ba39",
+      "expected_decoded_bytes": 2097189,
+      "expected_decoded_sha256": "d4a6a5c160293ee7f0ac94b89193501ce4f4ca3405a6ee625bace8b1f79fe873",
+      "scope": "valid gzip"
+    },
+    "concat-empty.gz": {
+      "bytes": 8823,
+      "sha256": "d7e8171a0f7743d54bb3efb7a3af9a5375d12e72d92d1b1683c494dee19a4f78",
+      "expected_decoded_bytes": 2097189,
+      "expected_decoded_sha256": "d4a6a5c160293ee7f0ac94b89193501ce4f4ca3405a6ee625bace8b1f79fe873",
+      "scope": "valid gzip"
+    },
+    "bad-crc.gz": {
+      "bytes": 8466,
+      "sha256": "ea39373328d6df087603edfc14b20d5aeb99757ab6a602d6ffb16e80596242e2",
+      "expected_decoded_bytes": null,
+      "expected_decoded_sha256": null,
+      "scope": "must report CRC input error; any observed prefix must match literal pattern"
+    },
+    "truncated.gz": {
+      "bytes": 8462,
+      "sha256": "8a685d4d9c81dae200996f3330a5d03fee70c68aea9e3f2c0180ae886bf6329e",
+      "expected_decoded_bytes": null,
+      "expected_decoded_sha256": null,
+      "scope": "must reject incomplete footer, not clean EOF"
+    },
+    "reads-r1.gz": {
+      "bytes": 108557,
+      "sha256": "4eff8b734e582966c1aece28a757d60e16cd358fc91065adbae06611407f0993",
+      "expected_decoded_bytes": 2076890,
+      "expected_decoded_sha256": "55d11c7194090713a0b524f728924425ee5b49305ffccb7f76ea1c670f45c559",
+      "scope": "valid gzip"
+    },
+    "reads-r2.gz": {
+      "bytes": 105486,
+      "sha256": "f1396fae85a6892ea98c704eacfe750eaf2d23f77ff2a1ad55bf72669067749f",
+      "expected_decoded_bytes": 1680890,
+      "expected_decoded_sha256": "6eeb45090c86ed2a550445526fa878428aa2d253a14d1b9c7e14030933b46dff",
+      "scope": "valid gzip"
+    },
+    "reads-no-final-newline.gz": {
+      "bytes": 108557,
+      "sha256": "09a060fa124658011736af4757d8a46a36b2b2c1b34ebdf5326eac2682959285",
+      "expected_decoded_bytes": 2076889,
+      "expected_decoded_sha256": "33e2c3e6191483ba3a386e4f40c27adaed38e72e38766f191323172192cba8e3",
+      "scope": "valid gzip"
+    },
+    "reads-concat.gz": {
+      "bytes": 108691,
+      "sha256": "94b709e8fd81bdbf3a40d1956266070680e6a3d085eedcacab853056126dd001",
+      "expected_decoded_bytes": 2076890,
+      "expected_decoded_sha256": "55d11c7194090713a0b524f728924425ee5b49305ffccb7f76ea1c670f45c559",
+      "scope": "valid gzip"
+    },
+    "reads-bad-crc.gz": {
+      "bytes": 108557,
+      "sha256": "2ed9e9224adabd946a9c8f876ba3dcb928b6dfcd00bbe0541cc14e7094dd01ea",
+      "expected_decoded_bytes": null,
+      "expected_decoded_sha256": null,
+      "scope": "late CRC input failure/no complete output set"
+    },
+    "reads-truncated.gz": {
+      "bytes": 108553,
+      "sha256": "78a6c02cae4b90246487f66733c44ede303d2ef759bcd373789d6f2913215b6a",
+      "expected_decoded_bytes": null,
+      "expected_decoded_sha256": null,
+      "scope": "late truncated-footer input failure/no complete output set"
+    }
+  }
+}

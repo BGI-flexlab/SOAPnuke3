@@ -1,0 +1,2210 @@
+{
+  "sets": {
+    "Process": [
+      "resource-catalog",
+      "out-dir",
+      "html-report",
+      "repetition",
+      "repetition-units",
+      "overrep-fraction",
+      "qc-only",
+      "config",
+      "interleaved",
+      "out-interleaved",
+      "lanes",
+      "limit-units",
+      "memory-mib",
+      "adapter3-r1",
+      "adapter3-r2",
+      "adapter-file",
+      "adapter-action",
+      "adapter-min-overlap",
+      "adapter-max-error",
+      "max-length",
+      "max-n-count",
+      "max-n-fraction",
+      "low-q",
+      "max-low-q-fraction",
+      "min-mean-q",
+      "min-complexity",
+      "pair-policy",
+      "profile",
+      "screen-method",
+      "screen-action",
+      "screen-pair",
+      "screen-unscorable",
+      "screen-hits",
+      "srna-min-insert",
+      "screen-k",
+      "screen-min-hits",
+      "srna-reject5",
+      "srna-reject-poly-a",
+      "merge",
+      "merged-out",
+      "unmerged-mode",
+      "overlap-min",
+      "overlap-max-error",
+      "correct-overlap",
+      "correction-delta",
+      "min-insert-length",
+      "sample-id",
+      "sample-fraction",
+      "sample-seed",
+      "split-units",
+      "progress-seconds",
+      "metrics",
+      "r1",
+      "r2",
+      "out1",
+      "out2",
+      "report",
+      "infer-adapter",
+      "infer-units",
+      "infer-min-support",
+      "match-report",
+      "match-limit",
+      "reject1",
+      "reject2",
+      "transformed1",
+      "transformed2",
+      "singleton1",
+      "singleton2",
+      "input-phred",
+      "output-phred",
+      "threads",
+      "gzip-level",
+      "input-format",
+      "output-format",
+      "decoder",
+      "min-length",
+      "cut-r1",
+      "cut-r2",
+      "quality-mode",
+      "quality-q",
+      "quality-window",
+      "tail-bases",
+      "tail-min",
+      "stage-order",
+      "adapter5-r1",
+      "adapter5-r2",
+      "extract-label",
+      "screen-reference",
+      "label-kind",
+      "label-remove",
+      "label-min-q",
+      "label-max-n",
+      "retain-r1",
+      "retain-r2"
+    ],
+    "Demux": [
+      "r1",
+      "r2",
+      "interleaved",
+      "lanes",
+      "limit-units",
+      "input-format",
+      "input-phred",
+      "report",
+      "html-report",
+      "sample-id",
+      "config",
+      "threads",
+      "decoder",
+      "memory-mib",
+      "progress-seconds",
+      "metrics",
+      "resource-catalog",
+      "help",
+      "version",
+      "output-format",
+      "output-phred",
+      "gzip-level",
+      "samples",
+      "barcode-source",
+      "barcode-r1",
+      "barcode-r2",
+      "i1",
+      "i2",
+      "barcode-errors",
+      "barcode-min-q",
+      "barcode-max-n",
+      "barcode-remove",
+      "out-dir",
+      "output-template",
+      "unassigned1",
+      "unassigned2",
+      "ambiguous1",
+      "ambiguous2"
+    ],
+    "Dedup": [
+      "r1",
+      "r2",
+      "interleaved",
+      "lanes",
+      "input-format",
+      "input-phred",
+      "report",
+      "html-report",
+      "sample-id",
+      "config",
+      "threads",
+      "decoder",
+      "memory-mib",
+      "progress-seconds",
+      "metrics",
+      "resource-catalog",
+      "help",
+      "version",
+      "out1",
+      "out2",
+      "out-interleaved",
+      "output-format",
+      "output-phred",
+      "gzip-level",
+      "key",
+      "duplicates1",
+      "duplicates2",
+      "spill-dir"
+    ],
+    "Report": [
+      "input-report",
+      "html-report",
+      "tsv",
+      "export",
+      "export-out",
+      "consumer-version",
+      "consumer-contract",
+      "allow-unqualified"
+    ],
+    "Resources": [
+      "resource-catalog"
+    ]
+  },
+  "aliases": {
+    "-1": "r1",
+    "--fq1": "r1",
+    "-2": "r2",
+    "--fq2": "r2",
+    "-C": "out1",
+    "--cleanFq1": "out1",
+    "-D": "out2",
+    "--cleanFq2": "out2",
+    "-o": "out-dir",
+    "--outDir": "out-dir",
+    "-T": "threads",
+    "--thread": "threads",
+    "-l": "low-q",
+    "--lowQual": "low-q",
+    "-q": "max-low-q-fraction",
+    "--qualRate": "max-low-q-fraction",
+    "-n": "max-n-fraction",
+    "--nRate": "max-n-fraction",
+    "-m": "min-mean-q",
+    "--mean": "min-mean-q",
+    "-4": "min-length",
+    "--minReadLen": "min-length",
+    "--minLen": "min-length",
+    "--maxReadLen": "max-length",
+    "-f": "adapter3-r1",
+    "--adapter1": "adapter3-r1",
+    "-r": "adapter3-r2",
+    "--adapter2": "adapter3-r2",
+    "-w": "split-units",
+    "--cleanOutSplit": "split-units",
+    "--output_clean": "split-units",
+    "-t": "trim",
+    "--trim": "trim",
+    "-Q": "qualSys",
+    "--qualSys": "qualSys",
+    "--outQualSys": "outQualSys",
+    "-h": "help",
+    "-v": "version",
+    "-J": "adapter-action",
+    "--ada_trim": "adapter-action",
+    "-E": "adapter-action",
+    "--cutAdaptor": "adapter-action",
+    "-G": "output-phred"
+  },
+  "metadata": [
+    {
+      "name": "adapter-action",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [
+        "-J",
+        "--ada_trim",
+        "-E",
+        "--cutAdaptor"
+      ],
+      "help": {
+        "Process": [
+          "  -J, --ada_trim                Select adapter trimming (already the default).\n                                Also -E/--cutAdaptor; no value is accepted.",
+          "  --adapter-action ACTION       trim or discard matching reads. [trim]"
+        ]
+      }
+    },
+    {
+      "name": "adapter-file",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "List",
+      "repeatable": true,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --adapter-file FASTA          Load named adapters; may be repeated.\n                                Header example: >adapter1;mate=R1;end=3"
+        ]
+      }
+    },
+    {
+      "name": "adapter-max-error",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Number",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --adapter-max-error FLOAT     Maximum mismatch fraction, 0..1. [0.1]"
+        ]
+      }
+    },
+    {
+      "name": "adapter-min-overlap",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --adapter-min-overlap INT     Minimum matched overlap in bases. [3]"
+        ]
+      }
+    },
+    {
+      "name": "adapter3-r1",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "List",
+      "repeatable": true,
+      "aliases": [
+        "-f",
+        "--adapter1"
+      ],
+      "help": {
+        "Process": [
+          "  -f, --adapter1 SEQ            Mate 1 / SE 3' adapter; may be repeated.\n                                Also --adapter3-r1. Sequence only; files use\n                                --adapter-file."
+        ]
+      }
+    },
+    {
+      "name": "adapter3-r2",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "List",
+      "repeatable": true,
+      "aliases": [
+        "-r",
+        "--adapter2"
+      ],
+      "help": {
+        "Process": [
+          "  -r, --adapter2 SEQ            Mate 2 3' adapter; may be repeated.\n                                Also --adapter3-r2. Sequence only; files use\n                                --adapter-file."
+        ]
+      }
+    },
+    {
+      "name": "adapter5-r1",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "List",
+      "repeatable": true,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --adapter5-r1 SEQ             Mate 1 / SE anchored 5' adapter; repeatable."
+        ]
+      }
+    },
+    {
+      "name": "adapter5-r2",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "List",
+      "repeatable": true,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --adapter5-r2 SEQ             Mate 2 anchored 5' adapter; repeatable."
+        ]
+      }
+    },
+    {
+      "name": "allow-unqualified",
+      "jobs": [
+        "Report"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Report": [
+          "  --allow-unqualified[=BOOL]    Permit a draft contract. [false]\n                                Use =false to require qualified evidence.\n                                Invalid qualification claims always fail."
+        ]
+      }
+    },
+    {
+      "name": "ambiguous1",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --ambiguous1 FILE             Optional ambiguous SE / R1 output. [off]",
+          "  --ambiguous2 FILE             Ambiguous R2; requires --ambiguous1 and PE."
+        ]
+      }
+    },
+    {
+      "name": "ambiguous2",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --ambiguous2 FILE             Ambiguous R2; requires --ambiguous1 and PE."
+        ]
+      }
+    },
+    {
+      "name": "barcode-errors",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --barcode-errors INT          Maximum total Hamming distance, >=0. [0]\n                                Equal best sample matches are ambiguous."
+        ]
+      }
+    },
+    {
+      "name": "barcode-max-n",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --barcode-max-n INT           Maximum captured N bases, >=0. [0]"
+        ]
+      }
+    },
+    {
+      "name": "barcode-min-q",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "IntegerOrOff",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --barcode-min-q VALUE         Minimum captured numeric quality: off or 0..93.\n                                [off]"
+        ]
+      }
+    },
+    {
+      "name": "barcode-r1",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --barcode-r1 START:END        Inline R1 capture, 1-based inclusive positions.\n                                Required in inline mode; no default range."
+        ]
+      }
+    },
+    {
+      "name": "barcode-r2",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --barcode-r2 START:END        Optional inline R2 capture; requires PE."
+        ]
+      }
+    },
+    {
+      "name": "barcode-remove",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --barcode-remove [BOOL]       Remove captured inline positions. [false]\n                                Forbidden in index mode, even explicit false."
+        ]
+      }
+    },
+    {
+      "name": "barcode-source",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --barcode-source MODE         inline or index. [inline]"
+        ]
+      }
+    },
+    {
+      "name": "config",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --config JSON                 Load {\"job\":\"process\",\"options\":{...}}.\n                                CLI overrides config; config overrides\n                                defaults."
+        ],
+        "Demux": [
+          "  --config JSON                 Load {\"job\":\"demux\",\"options\":{...}}.\n                                CLI overrides config, then defaults."
+        ],
+        "Dedup": [
+          "  --config JSON                 Load {\"job\":\"dedup\",\"options\":{...}}.\n                                CLI overrides config, then defaults."
+        ]
+      }
+    },
+    {
+      "name": "consumer-contract",
+      "jobs": [
+        "Report"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Report": [
+          "  --consumer-contract JSON      Required consumer contract for the actual\n                                producer and consumer evidence."
+        ]
+      }
+    },
+    {
+      "name": "consumer-version",
+      "jobs": [
+        "Report"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Report": [
+          "  --consumer-version TEXT       Required pinned target: 1.27.1 for MultiQC;\n                                f781cef13b5448eaf3673a5d82550d0267086480\n                                for MGnify RawR."
+        ]
+      }
+    },
+    {
+      "name": "correct-overlap",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --correct-overlap [BOOL]      Correct confident overlap mismatches. [false]"
+        ]
+      }
+    },
+    {
+      "name": "correction-delta",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --correction-delta INT        Required quality difference for correction. [5]"
+        ]
+      }
+    },
+    {
+      "name": "cut-r1",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --cut-r1 HEAD,TAIL            Remove fixed bases from mate 1 / SE. [0,0]"
+        ]
+      }
+    },
+    {
+      "name": "cut-r2",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --cut-r2 HEAD,TAIL            Remove fixed bases from mate 2. [0,0]"
+        ]
+      }
+    },
+    {
+      "name": "decoder",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --decoder MODE                auto, zlib, rapidgzip. [auto]\n                                Explicit rapidgzip needs a seekable gzip file\n                                and at least 14 threads; stdin uses zlib."
+        ],
+        "Demux": [
+          "  --decoder MODE                auto, zlib, rapidgzip. [auto]\n                                Explicit rapidgzip needs a seekable gzip file\n                                and at least 14 threads; stdin uses zlib."
+        ],
+        "Dedup": [
+          "  --decoder MODE                auto, zlib, rapidgzip. [auto]\n                                Explicit rapidgzip needs a seekable gzip file\n                                and at least 14 threads; stdin uses zlib."
+        ]
+      }
+    },
+    {
+      "name": "duplicates1",
+      "jobs": [
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Dedup": [
+          "  --duplicates1 FILE            Optional original-order duplicate SE / R1.\n                                [off]",
+          "  --duplicates2 FILE            Duplicate R2; required with --duplicates1\n                                for PE, including interleaved main output."
+        ]
+      }
+    },
+    {
+      "name": "duplicates2",
+      "jobs": [
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Dedup": [
+          "  --duplicates2 FILE            Duplicate R2; required with --duplicates1\n                                for PE, including interleaved main output."
+        ]
+      }
+    },
+    {
+      "name": "export",
+      "jobs": [
+        "Report"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Report": [
+          "  --export FORMAT               multiqc or mgnify. [off]\n                                Requires a complete source report and the\n                                version/contract options below."
+        ]
+      }
+    },
+    {
+      "name": "export-out",
+      "jobs": [
+        "Report"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Report": [
+          "  --export-out FILE             Required destination for a named export.\n                                MultiQC: filename must end in _mqc.json.\n                                MGnify: JSON provenance plus a second file,\n                                FILE.samplesheet.csv for RawR validation."
+        ]
+      }
+    },
+    {
+      "name": "extract-label",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "List",
+      "repeatable": true,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --extract-label SPEC          Capture a UMI/barcode; may be repeated.\n                                Format: name@r1:start:length; r2 also\n                                supported.\n                                Coordinates start at 1, before trimming."
+        ]
+      }
+    },
+    {
+      "name": "gzip-level",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --gzip-level INT              Gzip compression level, 1..9. [4]\n                                Set explicitly only for gzip output."
+        ],
+        "Demux": [
+          "  --gzip-level INT              Gzip compression level, 1..9. [4]\n                                Set explicitly only for gzip output."
+        ],
+        "Dedup": [
+          "  --gzip-level INT              Gzip compression level, 1..9. [4]\n                                Set explicitly only for gzip output."
+        ]
+      }
+    },
+    {
+      "name": "help",
+      "jobs": [
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [
+        "-h"
+      ],
+      "help": {
+        "Demux": [
+          "  -h, --help                    Show this help without processing."
+        ],
+        "Dedup": [
+          "  -h, --help                    Show this help without processing."
+        ]
+      }
+    },
+    {
+      "name": "html-report",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup",
+        "Report"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --html-report FILE            Also write an HTML QC summary. [off]"
+        ],
+        "Demux": [
+          "  --html-report FILE            Also write a local HTML summary. [off]"
+        ],
+        "Dedup": [
+          "  --html-report FILE            Also write a local HTML summary. [off]"
+        ],
+        "Report": [
+          "  --html-report FILE            Self-contained HTML with embedded source JSON.\n                                [off]"
+        ]
+      }
+    },
+    {
+      "name": "i1",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --i1 FILE                     First synchronized index input in index mode."
+        ]
+      }
+    },
+    {
+      "name": "i2",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --i2 FILE                     Second index input; required if any sample has\n                                a nonempty barcode2. No stdin for I1/I2."
+        ]
+      }
+    },
+    {
+      "name": "infer-adapter",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --infer-adapter MATES         Infer 3' adapters: off, r1, r2, both. [off]"
+        ]
+      }
+    },
+    {
+      "name": "infer-min-support",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Number",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --infer-min-support FLOAT     Minimum inference support, 0..1. [0.01]"
+        ]
+      }
+    },
+    {
+      "name": "infer-units",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --infer-units INT             Input prefix used for inference. [100000]"
+        ]
+      }
+    },
+    {
+      "name": "input-format",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --input-format FORMAT         auto, fastq, gzip. [auto]"
+        ],
+        "Demux": [
+          "  --input-format FORMAT         auto, fastq, gzip. [auto]"
+        ],
+        "Dedup": [
+          "  --input-format FORMAT         auto, fastq, gzip. [auto]"
+        ]
+      }
+    },
+    {
+      "name": "input-phred",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --input-phred INT             Input quality encoding: 33 or 64. [33]"
+        ],
+        "Demux": [
+          "  --input-phred INT             Quality encoding: 33 or 64. [33]"
+        ],
+        "Dedup": [
+          "  --input-phred INT             Quality encoding: 33 or 64. [33]"
+        ]
+      }
+    },
+    {
+      "name": "input-report",
+      "jobs": [
+        "Report"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Report": [
+          "  --input-report JSON           Required saved soapnuke-v3.report/2 report."
+        ]
+      }
+    },
+    {
+      "name": "interleaved",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --interleaved [BOOL]          Read alternating R1/R2 from --r1. [false]"
+        ],
+        "Demux": [
+          "  --interleaved [BOOL]          Alternating R1/R2 in --r1; excludes --r2.\n                                [false]"
+        ],
+        "Dedup": [
+          "  --interleaved [BOOL]          Alternating R1/R2 in --r1; excludes --r2.\n                                [false]"
+        ]
+      }
+    },
+    {
+      "name": "key",
+      "jobs": [
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Dedup": [
+          "  --key MODE                    Only full-sequence is supported.\n                                [full-sequence]"
+        ]
+      }
+    },
+    {
+      "name": "label-kind",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --label-kind KIND             umi or barcode. [umi]"
+        ]
+      }
+    },
+    {
+      "name": "label-max-n",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --label-max-n INT             Maximum N bases in a captured label. [0]"
+        ]
+      }
+    },
+    {
+      "name": "label-min-q",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --label-min-q INT             Minimum captured-base quality, 0..93. [off]"
+        ]
+      }
+    },
+    {
+      "name": "label-remove",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --label-remove [BOOL]         Remove captured bases from processed reads.\n                                [false]"
+        ]
+      }
+    },
+    {
+      "name": "lanes",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --lanes TSV                   Read lanes in TSV order: lane_id, r1, r2.\n                                Use tab separators; leave r2 empty for SE.\n                                Paths are relative to the TSV directory.\n                                Requires --sample-id; excludes --r1/--r2."
+        ],
+        "Demux": [
+          "  --lanes TSV                   Ordered lane_id, r1, r2 columns, tab-separated.\n                                Paths are relative to the TSV directory.\n                                Requires --sample-id; replaces r1/r2 input."
+        ],
+        "Dedup": [
+          "  --lanes TSV                   Ordered lane_id, r1, r2 columns, tab-separated.\n                                Paths are relative to the TSV directory.\n                                Requires --sample-id; replaces r1/r2 input."
+        ]
+      }
+    },
+    {
+      "name": "limit-units",
+      "jobs": [
+        "Process",
+        "Demux"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --limit-units INT             Read only the first INT units. [all]"
+        ],
+        "Demux": [
+          "  --limit-units INT             Examine only the first INT complete units,\n                                across lanes; INT must be >=1. [all]"
+        ]
+      }
+    },
+    {
+      "name": "low-q",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [
+        "-l",
+        "--lowQual"
+      ],
+      "help": {
+        "Process": [
+          "  -l, --lowQual INT             Low-quality base threshold, Phred 0..93.\n                                Also --low-q; counts bases strictly below the\n                                threshold.\n                                Use with --max-low-q-fraction. [off]"
+        ]
+      }
+    },
+    {
+      "name": "match-limit",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --match-limit INT             Maximum audit rows; needs --match-report.\n                                [1000]"
+        ]
+      }
+    },
+    {
+      "name": "match-report",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --match-report FILE           Write a bounded adapter-match audit. [off]",
+          "  --match-limit INT             Maximum audit rows; needs --match-report.\n                                [1000]"
+        ]
+      }
+    },
+    {
+      "name": "max-length",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [
+        "--maxReadLen"
+      ],
+      "help": {
+        "Process": [
+          "  --maxReadLen INT              Maximum read length in bases. [off]\n                                Also --max-length."
+        ]
+      }
+    },
+    {
+      "name": "max-low-q-fraction",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Number",
+      "repeatable": false,
+      "aliases": [
+        "-q",
+        "--qualRate"
+      ],
+      "help": {
+        "Process": [
+          "  -q, --qualRate FLOAT          Maximum low-quality fraction, 0..1. [off]\n                                Also --max-low-q-fraction; use with -l."
+        ]
+      }
+    },
+    {
+      "name": "max-n-count",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --max-n-count INT             Maximum number of N bases. [off]"
+        ]
+      }
+    },
+    {
+      "name": "max-n-fraction",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Number",
+      "repeatable": false,
+      "aliases": [
+        "-n",
+        "--nRate"
+      ],
+      "help": {
+        "Process": [
+          "  -n, --nRate FLOAT             Maximum fraction of N bases, 0..1. [off]\n                                Also --max-n-fraction; rejects strictly above\n                                the limit."
+        ]
+      }
+    },
+    {
+      "name": "memory-mib",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --memory-mib INT              Additional managed-buffer limit in MiB.\n                                This is not a limit on total process memory."
+        ],
+        "Demux": [
+          "  --memory-mib INT              Additional managed-buffer limit in MiB.\n                                Not a limit on total process memory. [none]"
+        ],
+        "Dedup": [
+          "  --memory-mib INT              Additional managed-buffer limit in MiB.\n                                Not a limit on total process memory. [none]"
+        ]
+      }
+    },
+    {
+      "name": "merge",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --merge [BOOL]                Merge overlapping pairs; needs --merged-out.\n                                Correction and merging need both-pass. [false]"
+        ]
+      }
+    },
+    {
+      "name": "merged-out",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --merge [BOOL]                Merge overlapping pairs; needs --merged-out.\n                                Correction and merging need both-pass. [false]",
+          "  --merged-out FILE             Output merged reads. [off]"
+        ]
+      }
+    },
+    {
+      "name": "metrics",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --metrics BOOL                Include runtime metrics: true or false. [true]"
+        ],
+        "Demux": [
+          "  --metrics [BOOL]              Include available runtime observations. [true]"
+        ],
+        "Dedup": [
+          "  --metrics [BOOL]              Include available runtime observations. [true]"
+        ]
+      }
+    },
+    {
+      "name": "min-complexity",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Number",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --min-complexity FLOAT        Minimum adjacent-base change fraction, 0..1.\n                                Counts changes between A/C/G/T bases. [off]"
+        ]
+      }
+    },
+    {
+      "name": "min-insert-length",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --min-insert-length INT       Reject confidently shorter inserts. [off]\n                                Pairs without a usable overlap are not\n                                rejected."
+        ]
+      }
+    },
+    {
+      "name": "min-length",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [
+        "-4",
+        "--minReadLen",
+        "--minLen"
+      ],
+      "help": {
+        "Process": [
+          "  -4, --minReadLen INT          Minimum read length in bases. [1]\n                                Also --min-length or --minLen."
+        ]
+      }
+    },
+    {
+      "name": "min-mean-q",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Number",
+      "repeatable": false,
+      "aliases": [
+        "-m",
+        "--mean"
+      ],
+      "help": {
+        "Process": [
+          "  -m, --mean FLOAT              Minimum mean Phred score, 0..93. [off]\n                                Also --min-mean-q."
+        ]
+      }
+    },
+    {
+      "name": "out-dir",
+      "jobs": [
+        "Process",
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [
+        "-o",
+        "--outDir"
+      ],
+      "help": {
+        "Process": [
+          "  -C/-D name the clean outputs; -o sets their existing output directory.",
+          "  -o, --outDir DIR              Existing directory for relative output paths.\n                                Also --out-dir. Absolute paths stay absolute.\n                                Inputs/resources still use the working\n                                directory."
+        ],
+        "Demux": [
+          "  --out-dir must be new, with an existing parent; --report is required.",
+          "  -o, --outDir DIR              New sample output directory; also --out-dir."
+        ]
+      }
+    },
+    {
+      "name": "out-interleaved",
+      "jobs": [
+        "Process",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --out-interleaved FILE        Write alternating R1/R2 instead of out1/out2."
+        ],
+        "Dedup": [
+          "  --out-interleaved BOOL        Write paired representatives to --out1 in\n                                alternating mate order; omit --out2. [false]"
+        ]
+      }
+    },
+    {
+      "name": "out1",
+      "jobs": [
+        "Process",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [
+        "-C",
+        "--cleanFq1"
+      ],
+      "help": {
+        "Process": [
+          "  -C/-D name the clean outputs; -o sets their existing output directory.",
+          "  -C, --cleanFq1 FILE           Clean SE reads or clean mate 1.\n                                Also --out1.",
+          "  -D, --cleanFq2 FILE           Clean mate 2; use with --out1 for PE.\n                                Also --out2."
+        ],
+        "Dedup": [
+          "  -C, --cleanFq1 FILE           Required representative SE / R1; also --out1.",
+          "  --out-interleaved BOOL        Write paired representatives to --out1 in\n                                alternating mate order; omit --out2. [false]"
+        ]
+      }
+    },
+    {
+      "name": "out2",
+      "jobs": [
+        "Process",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [
+        "-D",
+        "--cleanFq2"
+      ],
+      "help": {
+        "Process": [
+          "  -C/-D name the clean outputs; -o sets their existing output directory.",
+          "  -D, --cleanFq2 FILE           Clean mate 2; use with --out1 for PE.\n                                Also --out2."
+        ],
+        "Dedup": [
+          "  -D, --cleanFq2 FILE           Representative R2 for split PE; also --out2."
+        ]
+      }
+    },
+    {
+      "name": "output-format",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --output-format FORMAT        auto, fastq, gzip. [auto, based on suffix]",
+          "  --output-format fastq; it cannot be rolled back. Always use a named report."
+        ],
+        "Demux": [
+          "  --output-format FORMAT        auto, fastq, gzip. [auto, based on suffix]"
+        ],
+        "Dedup": [
+          "  --output-format FORMAT        auto, fastq, gzip. [auto, based on suffix]"
+        ]
+      }
+    },
+    {
+      "name": "output-phred",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [
+        "-G"
+      ],
+      "help": {
+        "Process": [
+          "  --output-phred INT            Output quality encoding: 33 or 64. [33]",
+          "  -G                            Output Phred+33; same as --output-phred 33."
+        ],
+        "Demux": [
+          "  --output-phred INT            Output quality encoding: 33 or 64. [33]",
+          "  -G                            Output Phred+33."
+        ],
+        "Dedup": [
+          "  --output-phred INT            Output quality encoding: 33 or 64. [33]",
+          "  -G                            Output Phred+33."
+        ]
+      }
+    },
+    {
+      "name": "output-template",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --output-template TEXT        Per-sample names; {sample} and {mate} expand.\n                                [{sample}_R{mate}.fastq.gz]"
+        ]
+      }
+    },
+    {
+      "name": "overlap-max-error",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Number",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --overlap-max-error FLOAT     Maximum overlap mismatch fraction, 0..1. [0.1]"
+        ]
+      }
+    },
+    {
+      "name": "overlap-min",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --overlap-min INT             Minimum overlap in bases. [20]"
+        ]
+      }
+    },
+    {
+      "name": "overrep-fraction",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Number",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --overrep-fraction FLOAT      Report prefix sequences above this fraction,\n                                0..1; requires --repetition. [off]"
+        ]
+      }
+    },
+    {
+      "name": "pair-policy",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --pair-policy POLICY          both-pass, either-pass, r1-pass. [both-pass]\n                                Controls ordinary mate filtering; explicit\n                                reference/insert rejection still rejects a\n                                pair."
+        ]
+      }
+    },
+    {
+      "name": "profile",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --profile NAME                ordinary or srna. [ordinary]\n                                srna requires an explicit 3' adapter and trim."
+        ]
+      }
+    },
+    {
+      "name": "progress-seconds",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --progress-seconds INT        Progress interval on stderr; 0 disables\n                                periodic updates, not the final event. [10]"
+        ],
+        "Demux": [
+          "  --progress-seconds INT        Stderr progress interval; 0 disables periodic\n                                updates, not the final event. [10]"
+        ],
+        "Dedup": [
+          "  --progress-seconds INT        Stderr progress interval; 0 disables periodic\n                                updates, not the final event. [10]"
+        ]
+      }
+    },
+    {
+      "name": "qc-only",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --qc-only [BOOL]              Compute QC without filtering or FASTQ output.\n                                No trimming or selection options. [false]"
+        ]
+      }
+    },
+    {
+      "name": "quality-mode",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --quality-mode MODE           off, ends, window, mott. [off]"
+        ]
+      }
+    },
+    {
+      "name": "quality-q",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --quality-q INT               Quality threshold, 0..93; required when\n                                enabled."
+        ]
+      }
+    },
+    {
+      "name": "quality-window",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --quality-window INT          Window size in bases; window mode only. [4]"
+        ]
+      }
+    },
+    {
+      "name": "r1",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [
+        "-1",
+        "--fq1"
+      ],
+      "help": {
+        "Process": [
+          "  -1 is the SE input or mate 1; -2 adds mate 2. PE means paired-end.",
+          "  -1, --fq1 FILE                Input FASTQ, plain or gzip; '-' for stdin.\n                                Also --r1.",
+          "  --interleaved [BOOL]          Read alternating R1/R2 from --r1. [false]"
+        ],
+        "Demux": [
+          "  -1, --fq1 FILE                SE input or mate 1, plain or gzip; also --r1.\n                                Use '-' for stdin with --sample-id.",
+          "  --interleaved [BOOL]          Alternating R1/R2 in --r1; excludes --r2.\n                                [false]"
+        ],
+        "Dedup": [
+          "  -1, --fq1 FILE                SE input or mate 1, plain or gzip; also --r1.\n                                Use '-' for stdin with --sample-id.",
+          "  --interleaved [BOOL]          Alternating R1/R2 in --r1; excludes --r2.\n                                [false]"
+        ]
+      }
+    },
+    {
+      "name": "r2",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [
+        "-2",
+        "--fq2"
+      ],
+      "help": {
+        "Process": [
+          "  -1 is the SE input or mate 1; -2 adds mate 2. PE means paired-end.",
+          "  -2, --fq2 FILE                Mate 2 FASTQ for paired-end processing.\n                                Also --r2."
+        ],
+        "Demux": [
+          "  -2, --fq2 FILE                Separate mate 2; also --r2. No stdin here.",
+          "  --interleaved [BOOL]          Alternating R1/R2 in --r1; excludes --r2.\n                                [false]"
+        ],
+        "Dedup": [
+          "  -2, --fq2 FILE                Separate mate 2; also --r2. No stdin here.",
+          "  --interleaved [BOOL]          Alternating R1/R2 in --r1; excludes --r2.\n                                [false]"
+        ]
+      }
+    },
+    {
+      "name": "reject1",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --reject1 FILE                Rejected mate 1 / SE reads. [off]"
+        ]
+      }
+    },
+    {
+      "name": "reject2",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --reject2 FILE                Rejected mate 2. [off]"
+        ]
+      }
+    },
+    {
+      "name": "repetition",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --repetition [BOOL]           Count exact repeated reads/pairs in an input\n                                prefix; does not remove duplicates. [false]"
+        ]
+      }
+    },
+    {
+      "name": "repetition-units",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --repetition-units INT        Prefix size for repetition analysis. [100000]"
+        ]
+      }
+    },
+    {
+      "name": "report",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --report FILE                 JSON QC report and final job status.\n                                Default with -o: SOAPnuke.json. Otherwise\n                                required."
+        ],
+        "Demux": [
+          "  --out-dir must be new, with an existing parent; --report is required.",
+          "  --report FILE                 Required new JSON report with final status."
+        ],
+        "Dedup": [
+          "  --spill-dir needs an existing scratch parent; --report is required.",
+          "  --report FILE                 Required new JSON report with final status."
+        ]
+      }
+    },
+    {
+      "name": "resource-catalog",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup",
+        "Resources"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --resource-catalog JSON       Optional local catalogue for id:ID adapter\n                                files or screen references. Direct paths\n                                still work; no default catalogue/download."
+        ],
+        "Demux": [
+          "  --resource-catalog JSON       Explicit local resource catalogue. [none]\n                                Does not download or select a database."
+        ],
+        "Dedup": [
+          "  --resource-catalog JSON       Explicit local resource catalogue. [none]\n                                Does not download or select a database."
+        ],
+        "Resources": [
+          "  --resource-catalog JSON       Required local soapnuke-v3.resources/1 file.\n                                No default catalogue.\n                                Resource paths inside it are relative to the\n                                catalogue's directory unless absolute."
+        ]
+      }
+    },
+    {
+      "name": "retain-r1",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --retain-r1 REGION            Keep START:END (inclusive) or all. [all]"
+        ]
+      }
+    },
+    {
+      "name": "retain-r2",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --retain-r2 REGION            Mate 2 region, START:END or all. [all]"
+        ]
+      }
+    },
+    {
+      "name": "sample-fraction",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Number",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --sample-fraction FLOAT       Fraction of accepted units to keep, 0..1. [1]"
+        ]
+      }
+    },
+    {
+      "name": "sample-id",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --sample-id TEXT              Report sample name. [input filename]\n                                Required with stdin or --lanes."
+        ],
+        "Demux": [
+          "  --sample-id TEXT              Run label. [input filename]\n                                Required with stdin or --lanes."
+        ],
+        "Dedup": [
+          "  --sample-id TEXT              Run label. [input filename]\n                                Required with stdin or --lanes."
+        ]
+      }
+    },
+    {
+      "name": "sample-seed",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --sample-seed INT             Unsigned 64-bit sampling seed. [0]\n                                Set explicitly only with sample-fraction < 1."
+        ]
+      }
+    },
+    {
+      "name": "samples",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --samples TSV                 Required columns: sample, barcode1, barcode2.\n                                Leave barcode2 empty for a single barcode.\n                                Sample barcodes use A/C/G/T."
+        ]
+      }
+    },
+    {
+      "name": "screen-action",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --screen-action ACTION        inspect, remove, retain. [inspect]\n                                Inspect only reports; remove/retain filter\n                                reads."
+        ]
+      }
+    },
+    {
+      "name": "screen-hits",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --screen-hits TSV             Existing hits for supplied-hits; also requires\n                                TSV.provenance.json bound to original inputs.\n                                No external screening tool is run\n                                automatically."
+        ]
+      }
+    },
+    {
+      "name": "screen-k",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --screen-k INT                Exact k-mer length for native screening. [31]"
+        ]
+      }
+    },
+    {
+      "name": "screen-method",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --screen-method METHOD        off, kmer-exact, supplied-hits.\n                                Default: kmer-exact with a reference; off\n                                without."
+        ]
+      }
+    },
+    {
+      "name": "screen-min-hits",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --screen-min-hits INT         Minimum distinct matching k-mers per reference.\n                                [2]"
+        ]
+      }
+    },
+    {
+      "name": "screen-pair",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --screen-pair POLICY          Pair is a hit if any or both mates hit. [any]"
+        ]
+      }
+    },
+    {
+      "name": "screen-reference",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "List",
+      "repeatable": true,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --screen-reference FASTA      Reference sequence file; may be repeated."
+        ]
+      }
+    },
+    {
+      "name": "screen-unscorable",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --screen-unscorable POLICY    keep or reject reads that cannot be scored.\n                                Required explicitly for remove/retain."
+        ]
+      }
+    },
+    {
+      "name": "singleton1",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --singleton1 FILE             Passing mate 1 when mate 2 fails. [off]"
+        ]
+      }
+    },
+    {
+      "name": "singleton2",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --singleton2 FILE             Passing mate 2 when mate 1 fails. [off]"
+        ]
+      }
+    },
+    {
+      "name": "spill-dir",
+      "jobs": [
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Dedup": [
+          "  --spill-dir needs an existing scratch parent; --report is required.",
+          "  --spill-dir DIR               Required existing scratch parent. Dedup creates\n                                a unique child for its temporary files.\n                                Allow space for the full input and sort runs."
+        ]
+      }
+    },
+    {
+      "name": "split-units",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [
+        "-w",
+        "--cleanOutSplit",
+        "--output_clean"
+      ],
+      "help": {
+        "Process": [
+          "  -w, --cleanOutSplit INT       Maximum units per output chunk. [off]\n                                Also --split-units or --output_clean.\n                                Main output paths must contain '{chunk}'.\n                                Pair mates stay together; stdout cannot split."
+        ]
+      }
+    },
+    {
+      "name": "srna-min-insert",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --srna-min-insert INT         Minimum insert before the 3' adapter. [1]"
+        ]
+      }
+    },
+    {
+      "name": "srna-reject-poly-a",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --srna-reject-poly-a [BOOL]   Reject poly-A runs using --tail-min. [false]"
+        ]
+      }
+    },
+    {
+      "name": "srna-reject5",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Boolean",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --srna-reject5 [BOOL]         Reject 5' adapter matches; needs adapter5-r1.\n                                [false]"
+        ]
+      }
+    },
+    {
+      "name": "stage-order",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --stage-order LIST            Order after fixed cuts; use each stage once.\n                                Default: tails,quality,adapters"
+        ]
+      }
+    },
+    {
+      "name": "tail-bases",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --tail-bases BASE             Trim terminal runs: off, A, C, G, T, N, all.\n                                [off]"
+        ]
+      }
+    },
+    {
+      "name": "tail-min",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --tail-min INT                Minimum terminal run length in bases. [10]",
+          "  --srna-reject-poly-a [BOOL]   Reject poly-A runs using --tail-min. [false]"
+        ]
+      }
+    },
+    {
+      "name": "threads",
+      "jobs": [
+        "Process",
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Integer",
+      "repeatable": false,
+      "aliases": [
+        "-T",
+        "--thread"
+      ],
+      "help": {
+        "Process": [
+          "  -T, --thread INT              Worker budget, up to available CPU limit.\n                                Also --threads.\n                                Default: 8, or the CPU limit if smaller."
+        ],
+        "Demux": [
+          "  -T, --thread INT              Worker budget; also --threads.\n                                Default: 8, or the CPU limit if smaller."
+        ],
+        "Dedup": [
+          "  -T, --thread INT              Worker budget; also --threads.\n                                Default: 8, or the CPU limit if smaller."
+        ]
+      }
+    },
+    {
+      "name": "transformed1",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --transformed1 FILE           Completed transformed mate 1 / SE reads. [off]"
+        ]
+      }
+    },
+    {
+      "name": "transformed2",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --transformed2 FILE           Completed transformed mate 2. [off]"
+        ]
+      }
+    },
+    {
+      "name": "tsv",
+      "jobs": [
+        "Report"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Report": [
+          "  --tsv FILE                    Aggregate input/accepted/written QC table:\n                                three rows, sixteen columns. [off]"
+        ]
+      }
+    },
+    {
+      "name": "unassigned1",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --unassigned1 FILE            Optional unassigned SE / R1 output. [off]",
+          "  --unassigned2 FILE            Unassigned R2; requires --unassigned1 and PE."
+        ]
+      }
+    },
+    {
+      "name": "unassigned2",
+      "jobs": [
+        "Demux"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Demux": [
+          "  --unassigned2 FILE            Unassigned R2; requires --unassigned1 and PE."
+        ]
+      }
+    },
+    {
+      "name": "unmerged-mode",
+      "jobs": [
+        "Process"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [],
+      "help": {
+        "Process": [
+          "  --unmerged-mode MODE          paired: write to mate outputs; discard: omit\n                                unmerged pairs. [paired]"
+        ]
+      }
+    },
+    {
+      "name": "version",
+      "jobs": [
+        "Demux",
+        "Dedup"
+      ],
+      "json_kind": "Text",
+      "repeatable": false,
+      "aliases": [
+        "-v"
+      ],
+      "help": {
+        "Demux": [
+          "  -v, --version                 Show package/build version."
+        ],
+        "Dedup": [
+          "  -v, --version                 Show package/build version."
+        ]
+      }
+    }
+  ]
+}

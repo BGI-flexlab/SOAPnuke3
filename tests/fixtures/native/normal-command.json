@@ -1,0 +1,26 @@
+{
+  "argv": [
+    "SOAPnuke",
+    "dedup",
+    "--r1",
+    "{FIXTURES}/dedup-se/input.R1.fastq",
+    "--report",
+    "{ROOT}/baseline/report.json",
+    "--threads",
+    "1",
+    "--input-phred",
+    "33",
+    "--output-phred",
+    "33",
+    "--out1",
+    "{ROOT}/baseline/representative.R1.fastq",
+    "--spill-dir",
+    "{ROOT}/baseline/spill",
+    "--key",
+    "full-sequence",
+    "--duplicates1",
+    "{ROOT}/baseline/duplicate.R1.fastq"
+  ],
+  "binary_sha256": "c6d1e48c3c484db782049bf56266537e0c87228bf9caa0e8e0bac4fab94c573d",
+  "synthetic": false
+}

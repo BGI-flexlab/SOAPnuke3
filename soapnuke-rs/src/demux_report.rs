@@ -1,0 +1,59 @@
+use crate::{native_qc::Qc, demux_runtime::{Channel,State}};
+use serde::ser::{Serialize,SerializeMap,SerializeSeq,Serializer};
+use serde_json::Value;
+use std::io::{self,Write};
+
+struct Bases([u64;6]);
+impl Serialize for Bases {fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let mut m=s.serialize_map(Some(6))?;for(k,v)in ["A","C","G","T","N","other"].iter().zip(self.0){m.serialize_entry(k,&v)?;}m.end()}}
+struct Fraction<'a>{n:u64,d:u64,unit:&'a str,stage:&'a str,channel:&'a str}
+impl Serialize for Fraction<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let mut m=s.serialize_map(Some(7))?;m.serialize_entry("numerator",&self.n)?;m.serialize_entry("denominator",&self.d)?;m.serialize_entry("unit",self.unit)?;m.serialize_entry("stage",self.stage)?;m.serialize_entry("channel",self.channel)?;m.serialize_entry("value",&if self.d==0{None}else{Some(self.n as f64/self.d as f64)})?;m.serialize_entry("unavailable_reason",&if self.d==0{Some("zero denominator")}else{None})?;m.end()}}
+struct Length<'a>{view:&'a QcView<'a>}
+impl Serialize for Length<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let q=self.view.q;let mut m=s.serialize_map(Some(6))?;m.serialize_entry("histogram",&q.lengths)?;m.serialize_entry("minimum",&q.lengths.iter().position(|n|*n>0))?;m.serialize_entry("maximum",&q.lengths.iter().rposition(|n|*n>0))?;m.serialize_entry("mean",&self.view.fraction(q.bases.iter().sum(),q.reads,"bases per read record"))?;let at=|rank|{let mut n=0;for(i,c)in q.lengths.iter().enumerate(){n+=c;if n>rank{return i;}}0};let median=if q.reads==0{None}else{Some((at((q.reads-1)/2)as f64+at(q.reads/2)as f64)/2.0)};m.serialize_entry("median",&median)?;m.serialize_entry("median_unavailable_reason",&if median.is_none(){Some("no observed records")}else{None})?;m.end()}}
+struct Cycles<'a>{view:&'a QcView<'a>}
+struct Cycle<'a>{view:&'a QcView<'a>,index:usize}
+impl Serialize for Cycles<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let mut seq=s.serialize_seq(Some(self.view.q.cycles.len()))?;for index in 0..self.view.q.cycles.len(){seq.serialize_element(&Cycle{view:self.view,index})?;}seq.end()}}
+impl Serialize for Cycle<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let c=&self.view.q.cycles[self.index];let d=c.bases.iter().sum();let mut m=s.serialize_map(Some(7))?;m.serialize_entry("cycle",&(self.index+1))?;m.serialize_entry("read_records",&d)?;m.serialize_entry("base_counts",&Bases(c.bases))?;m.serialize_entry("quality_histogram",c.qualities.as_slice())?;m.serialize_entry("mean_quality",&self.view.fraction(c.qualities.iter().enumerate().map(|(q,n)|q as u64*n).sum(),d,"Phred score per reaching record"))?;m.serialize_entry("q20_fraction",&self.view.fraction(c.qualities[20..].iter().sum(),d,"bases"))?;m.serialize_entry("q30_fraction",&self.view.fraction(c.qualities[30..].iter().sum(),d,"bases"))?;m.end()}}
+pub(crate) struct QcView<'a>{pub q:&'a Qc,pub stage:&'a str,pub channel:&'a str,pub units:u64,pub scope:&'a str}
+impl QcView<'_>{fn fraction<'a>(&'a self,n:u64,d:u64,unit:&'a str)->Fraction<'a>{Fraction{n,d,unit,stage:self.stage,channel:self.channel}}}
+impl Serialize for QcView<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let q=self.q;let bases=q.bases.iter().sum();let mut m=s.serialize_map(Some(20))?;m.serialize_entry("source_units",&self.units)?;m.serialize_entry("read_records",&q.reads)?;m.serialize_entry("bases",&bases)?;m.serialize_entry("n_bases",&q.bases[4])?;m.serialize_entry("q20_bases",&q.qualities[20..].iter().sum::<u64>())?;m.serialize_entry("q30_bases",&q.qualities[30..].iter().sum::<u64>())?;m.serialize_entry("scope",self.scope)?;m.serialize_entry("stage",self.stage)?;m.serialize_entry("channel",self.channel)?;m.serialize_entry("base_counts",&Bases(q.bases))?;m.serialize_entry("n_fraction",&self.fraction(q.bases[4],bases,"bases"))?;m.serialize_entry("gc_canonical_fraction",&self.fraction(q.bases[1]+q.bases[2],q.bases[..4].iter().sum(),"canonical bases"))?;m.serialize_entry("q20_fraction",&self.fraction(q.qualities[20..].iter().sum(),bases,"bases"))?;m.serialize_entry("q30_fraction",&self.fraction(q.qualities[30..].iter().sum(),bases,"bases"))?;m.serialize_entry("quality_histogram",q.qualities.as_slice())?;m.serialize_entry("length",&Length{view:self})?;m.serialize_entry("cycles",&Cycles{view:self})?;m.serialize_entry("observation","complete validated records only; zero other does not describe unseen or invalid records")?;m.end()}}
+struct Populations<'a>(&'a State);
+impl Serialize for Populations<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let mut m=s.serialize_map(Some(3))?;for(stage,q,units,scope)in [("input",&self.0.input,self.0.counts[0],"original biological reads"),("accepted",&self.0.accepted,self.0.counts[1],"routed inserts"),("written",&self.0.written,self.0.counts[4],"successfully emitted units")]{m.serialize_entry(stage,&QcView{q,stage,channel:"all",units,scope})?;}m.end()}}
+struct Channels<'a>{state:&'a State,channels:&'a[Channel],failed:bool}
+impl Serialize for Channels<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let mut m=s.serialize_map(None)?;for(c,q)in self.channels.iter().zip(&self.state.channels){if self.failed||c.name.starts_with("sample/")||q.reads>0{m.serialize_entry(&c.name,&QcView{q,stage:"written",channel:&c.name,units:q.reads,scope:"complete emitted channel records"})?;}}m.end()}}
+struct IndexQc<'a>(&'a State);
+impl Serialize for IndexQc<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let mut m=s.serialize_map(None)?;for(i,q)in self.0.indices.iter().enumerate(){if q.reads>0{m.serialize_entry(if i==0{"I1"}else{"I2"},&QcView{q,stage:"input",channel:if i==0{"I1"}else{"I2"},units:q.reads,scope:"complete validated index records examined by workers; not biological input units"})?;}}m.end()}}
+struct Demux<'a>{doc:&'a Document<'a>}
+impl Serialize for Demux<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let mut m=s.serialize_map(None)?;for(k,v)in self.doc.header["demux"].as_object().unwrap(){if k!="channel_qc"{m.serialize_entry(k,v)?;}}m.serialize_entry("index_qc",&IndexQc(self.doc.state))?;m.serialize_entry("channel_qc",&Channels{state:self.doc.state,channels:self.doc.channels,failed:self.doc.header["status"]!="complete"})?;m.end()}}
+pub(crate) struct Document<'a>{pub header:&'a Value,pub state:&'a State,pub channels:&'a[Channel]}
+impl Serialize for Document<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let mut m=s.serialize_map(None)?;for(k,v)in self.header.as_object().unwrap(){if k!="populations"&&k!="demux"{m.serialize_entry(k,v)?;}}m.serialize_entry("populations",&Populations(self.state))?;m.serialize_entry("demux",&Demux{doc:self})?;m.end()}}
+struct Count(usize);
+impl Write for Count{fn write(&mut self,b:&[u8])->io::Result<usize>{self.0=self.0.checked_add(b.len()).ok_or_else(||io::Error::other("report length overflow"))?;Ok(b.len())}fn flush(&mut self)->io::Result<()>{Ok(())}}
+struct Fixed<'a>{bytes:&'a mut Vec<u8>,limit:usize}
+impl Write for Fixed<'_>{fn write(&mut self,b:&[u8])->io::Result<usize>{if b.len()>self.limit-self.bytes.len(){return Err(io::Error::other("report exceeded pre-counted output capacity"));}self.bytes.extend_from_slice(b);Ok(b.len())}fn flush(&mut self)->io::Result<()>{Ok(())}}
+pub(crate) fn encode(header:&mut Value,state:&State,channels:&[Channel],e:&std::sync::Arc<crate::native_execution::Execution>)->Result<(String,crate::native_execution::FeatureTicket),String>{
+    let mut count=Count(0);serde_json::to_writer(&mut count,&Document{header,state,channels}).map_err(|e|e.to_string())?;
+    // Only existing execution-reservation integer fields change after admission.
+    // 4096 covers more than 200 additional u64 decimal digits/field separators.
+    let capacity=count.0.checked_add(4096).ok_or("report length overflow")?;
+    let ticket=e.reserve_finalization_feature(capacity).map_err(|e| e.to_string())?;header["execution"]=e.facts();
+    let mut bytes=Vec::new();bytes.try_reserve_exact(capacity).map_err(|e|e.to_string())?;if bytes.capacity()!=capacity{return Err("report capacity differs from reserved length".into());}
+    serde_json::to_writer(Fixed{bytes:&mut bytes,limit:capacity},&Document{header,state,channels}).map_err(|e|e.to_string())?;
+    Ok((String::from_utf8(bytes).map_err(|e|e.to_string())?,ticket))
+}
+
+struct Snapshot<'a>(&'a Document<'a>);
+impl Serialize for Snapshot<'_>{fn serialize<S:Serializer>(&self,s:S)->Result<S::Ok,S::Error>{let d=self.0;let mut m=s.serialize_map(None)?;for(k,v)in d.header.as_object().unwrap(){if !["populations","demux","status"].contains(&k.as_str()){m.serialize_entry(k,v)?;}}m.serialize_entry("authoritative",&false)?;m.serialize_entry("status","snapshot")?;m.serialize_entry("populations",&Populations(d.state))?;m.serialize_entry("demux",&Demux{doc:d})?;m.end()}}
+pub(crate) fn html<W:Write>(w:&mut W,doc:&Document<'_>,sample:&str)->io::Result<()>{crate::native_html::write_snapshot(w,sample,&Snapshot(doc),[(&doc.state.input,doc.state.counts[0]),(&doc.state.accepted,doc.state.counts[1]),(&doc.state.written,doc.state.counts[4])])}
+
+#[cfg(test)]mod tests{use super::*;
+#[test]fn streamed_qc_literal_and_existing_numeric_contract(){let mut q=Qc::default();q.observe_validated(b"ACGTN",&[33,52,53,63,126],33);let v=serde_json::to_value(QcView{q:&q,stage:"input",channel:"all",units:1,scope:"literal"}).unwrap();assert_eq!(v,q.metrics("input","all",1,"literal"));assert_eq!(v["quality_histogram"][93],1);assert_eq!(v["q20_bases"],3);assert_eq!(v["q30_bases"],2);assert_eq!(v["length"]["median"],5.0);assert_eq!(v["n_fraction"]["value"],0.2);let empty=Qc::default();let e=serde_json::to_value(QcView{q:&empty,stage:"input",channel:"all",units:0,scope:"literal"}).unwrap();assert_eq!(e,empty.metrics("input","all",0,"literal"));}
+#[test]fn fixed_output_writer_cannot_grow(){let mut b=Vec::with_capacity(4);let ptr=b.as_ptr();let mut w=Fixed{bytes:&mut b,limit:4};w.write_all(b"1234").unwrap();assert!(w.write_all(b"5").is_err());assert_eq!(b,b"1234");assert_eq!(ptr,b.as_ptr());}
+}
+#[cfg(test)]mod ownership_tests{use super::*;
+#[test]fn report_buffer_same_epoch_no_growth_and_drop_zero(){
+ let e=crate::native_execution::Execution::new(1,1,std::sync::Arc::new(std::sync::atomic::AtomicBool::new(false))).unwrap();
+ let mut q=Qc::default();q.observe_validated(b"AC",b"I!",33);let state=State{input:q.clone(),accepted:q.clone(),written:q.clone(),channels:vec![q],indices:Default::default(),error_lane:None,counts:[1,1,0,0,1],error:None};let channels=vec![Channel{name:"sample/S.R1".into(),path:"S.fastq".into(),codec:"plain".into(),phred:33}];let mut h=serde_json::json!({"schema":"soapnuke-v3.report/2","status":"complete","demux":{"routing":{"input_units":1}},"execution":e.facts()});
+ let(text,ticket)=encode(&mut h,&state,&channels,&e).unwrap();let v:Value=serde_json::from_str(&text).unwrap();assert_eq!(v["populations"]["input"]["read_records"],1);assert_eq!(v["populations"]["input"]["bases"],2);assert_eq!(v["populations"]["input"]["quality_histogram"][0],1);assert_eq!(v["populations"]["input"],state.input.metrics("input","all",1,"original biological reads"));assert_eq!(v["demux"]["channel_qc"]["sample/S.R1"],state.channels[0].metrics("written","sample/S.R1",1,"complete emitted channel records"));assert!(v["execution"]["memory_budget"]["current_feature_reserved_bytes"].as_u64().unwrap()>=text.capacity()as u64);drop(v);drop(text);drop(ticket);assert_eq!(e.facts()["memory_budget"]["current_feature_reserved_bytes"],0);
+ let active=e.admit(0,0,0).unwrap();assert!(encode(&mut h,&state,&channels,&e).is_err());drop(active);let(text,ticket)=encode(&mut h,&state,&channels,&e).unwrap();drop(text);drop(ticket);assert_eq!(e.facts()["memory_budget"]["current_feature_reserved_bytes"],0);
+}
+}

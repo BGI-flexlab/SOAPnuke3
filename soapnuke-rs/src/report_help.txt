@@ -1,0 +1,65 @@
+
+Usage:
+  SOAPnuke report --input-report JSON --html-report FILE [--tsv FILE]
+  SOAPnuke report --input-report JSON --tsv FILE
+  SOAPnuke report --input-report JSON --export FORMAT --export-out FILE
+                  --consumer-version TEXT --consumer-contract JSON [options]
+
+Start here:
+  Read a saved SOAPnuke JSON report; sequencing reads are not processed again.
+  Choose HTML, TSV, a named export, or more than one output.
+  Saved status, populations and unavailable values are preserved.
+  Use new output paths with existing parents; at least one output is required.
+
+Input and ordinary output:
+  --input-report JSON           Required saved soapnuke-v3.report/2 report.
+  --html-report FILE            Self-contained HTML with embedded source JSON.
+                                [off]
+  --tsv FILE                    Aggregate input/accepted/written QC table:
+                                three rows, sixteen columns. [off]
+
+Named exports:
+  MultiQC export writes custom-content JSON for MultiQC to read; SOAPnuke
+  does not import MultiQC data. No dedicated MultiQC parser is needed.
+  MGnify export supplies a RawR input contract, not a downstream analysis.
+  --export FORMAT               multiqc or mgnify. [off]
+                                Requires a complete source report and the
+                                version/contract options below.
+  --export-out FILE             Required destination for a named export.
+                                MultiQC: filename must end in _mqc.json.
+                                MGnify: JSON provenance plus a second file,
+                                FILE.samplesheet.csv for RawR validation.
+  --consumer-version TEXT       Required pinned target: 1.27.1 for MultiQC;
+                                f781cef13b5448eaf3673a5d82550d0267086480
+                                for MGnify RawR.
+  --consumer-contract JSON      Required consumer contract for the actual
+                                producer and consumer evidence.
+  --allow-unqualified[=BOOL]    Permit a draft contract. [false]
+                                Use =false to require qualified evidence.
+                                Invalid qualification claims always fail.
+
+Help:
+  -h, --help                    Show this help without rendering.
+  -v, --version                 Show the package version.
+
+Examples:
+  SOAPnuke report --input-report results/SOAPnuke.json \
+    --html-report NEW_view.html --tsv NEW_summary.tsv
+  SOAPnuke report --input-report results/SOAPnuke.json --export multiqc \
+    --export-out NEW_summary_mqc.json --consumer-version 1.27.1 \
+    --consumer-contract qualified.json
+
+The named-export example requires a qualified contract for this exact producer;
+old producer receipts do not qualify a new build. Draft exports require
+--allow-unqualified. MultiQC uses custom content; run it with --fullnames.
+RawR
+requires explicit sample/platform/layout/file metadata bound by the contract;
+workflow sample IDs use [A-Za-z0-9_.-]+. Compatibility covers input validation,
+not QC ingestion or acceptance of the downstream workflow.
+
+Each source, contract or receipt JSON is limited to 4 MiB; selected text is
+limited to 64 KiB. Input/output aliases and existing outputs are rejected.
+Writing and closing must succeed before publication; multiple output files are
+not published atomically. A saved complete status does not establish release
+qualification, and HTML serialization does not verify browser appearance.
+See docs/JOBS.md for consumer contracts and detailed limits.

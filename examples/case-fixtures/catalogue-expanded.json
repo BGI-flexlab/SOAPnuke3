@@ -1,0 +1,53 @@
+{
+  "schema": "soapnuke-v3.resources/1",
+  "resources": [
+    {
+      "id": "adapter-valid",
+      "kind": "adapter",
+      "path": "adapter-valid.fa",
+      "sha256": "c452dfa95fd271c957ed4f20f9e936988ff11654a80d24c94884a82535f5884c"
+    },
+    {
+      "id": "adapter-N",
+      "kind": "adapter",
+      "path": "adapter-N.fa",
+      "sha256": "5c9c0ec9551e3816137fbce87093df5cd76167442d323a20ceac12cf4cbb86e3"
+    },
+    {
+      "id": "adapter-n",
+      "kind": "adapter",
+      "path": "adapter-n.fa",
+      "sha256": "1a74c17b8e37faf1ed73989c0a7a286021ff4b422f834a749425fb526b25411c"
+    },
+    {
+      "id": "ref-upper",
+      "kind": "reference",
+      "path": "ref-upper.fa",
+      "sha256": "f4bbd776d2702679d8e8db7bf426fde64ca1be4076ad3dc92bdb08efb01e9960"
+    },
+    {
+      "id": "ref-lower",
+      "kind": "reference",
+      "path": "ref-lower.fa",
+      "sha256": "36c037f2c333dd3fe0971e147f6770b06bcf7c927b4fe4b056d26259f950b9e1"
+    },
+    {
+      "id": "ref-mixed",
+      "kind": "reference",
+      "path": "ref-mixed.fa",
+      "sha256": "6e6ae040d8441f7670e0fd224b4827fd6a1ad0494f2bb8d7b878d6224d557309"
+    },
+    {
+      "id": "adapter-lower",
+      "kind": "adapter",
+      "path": "adapter-lower.fa",
+      "sha256": "31db0ecc48c1c971aca2f80c0067eba5d8ff08f82659fc755e522f66157b4e98"
+    },
+    {
+      "id": "ref-ambiguous",
+      "kind": "reference",
+      "path": "ref-ambiguous.fa",
+      "sha256": "d95a25a770aa5c7659085c35412279a2cc1434c3f9da9cd09f3f5611a27ba9f2"
+    }
+  ]
+}

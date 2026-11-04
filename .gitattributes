@@ -1,0 +1,3 @@
+# An empty third TSV field represents an absent second barcode.
+tests/fixtures/demux-inline-se/samples.tsv whitespace=-blank-at-eol
+provenance/r96-all-screen-costs.tsv whitespace=cr-at-eol

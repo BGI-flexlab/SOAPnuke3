@@ -1,0 +1,34 @@
+{
+  "schema": "soapnuke-v3.resources/1",
+  "catalogue_version": "r79-test/1",
+  "resources": [
+    {
+      "id": "adapter-demo",
+      "kind": "adapter",
+      "path": "adapters.fa",
+      "sha256": "347a12d63d2125e1e76df4fe1d2cd4298dedb14f7f587dcaafafaf5bad250bfc",
+      "description": "authored adapter literal"
+    },
+    {
+      "id": "reference-demo",
+      "kind": "reference",
+      "path": "reference.fa",
+      "sha256": "01fc86a57f692aa26feb67c742349415ef5cde9161bd1e1157f96d16fdd09c34",
+      "description": "two artificial entries in one resource"
+    },
+    {
+      "id": "adapter-r2-demo",
+      "kind": "adapter",
+      "path": "adapters-r2.fa",
+      "sha256": "1588ea4e8005b74a7c9f2d1413e8d0f1ba24131f2f97ba6cafd3b33e05e7b74c",
+      "description": "R2-only header, not a sequence-valued option"
+    },
+    {
+      "id": "adapter-demo",
+      "kind": "adapter",
+      "path": "adapters.fa",
+      "sha256": "347a12d63d2125e1e76df4fe1d2cd4298dedb14f7f587dcaafafaf5bad250bfc",
+      "description": "authored adapter literal"
+    }
+  ]
+}

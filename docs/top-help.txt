@@ -1,0 +1,31 @@
+SOAPnuke 3.0.0 - FASTQ processing and quality control
+
+Usage:
+  SOAPnuke <command> [options]
+
+Commands:
+  process    Process single-end or paired-end FASTQ; write QC reports.
+  demux      Route sequencing units to samples using declared barcodes.
+  dedup      Group exact full sequences; keep stable representatives.
+  report     Render saved JSON as HTML/TSV or export supported formats.
+  resources  Inspect or verify a local catalogue of adapter/reference FASTA
+             files.
+
+Help:
+  SOAPnuke process --help    Processing options, defaults and migration notes.
+  SOAPnuke demux --help      Barcode, sample and IO options.
+  SOAPnuke dedup --help      Full-input grouping and scratch options.
+  SOAPnuke report --help     Saved-report rendering and export options.
+  SOAPnuke resources --help  Optional local catalogue: list/show declarations
+                            or verify files.
+  SOAPnuke -v, --version     Show version and build identity.
+  SOAPnuke -h, --help        Show this menu.
+
+Example: paired-end gzip, using familiar SOAPnuke flags and 16 threads
+  mkdir -p results
+  SOAPnuke process -1 reads_R1.fq.gz -2 reads_R2.fq.gz \
+    -C clean_R1.fq.gz -D clean_R2.fq.gz -o results -T 16
+
+The JSON report defaults to results/SOAPnuke.json with this command.
+Familiar flags use v3 rules and defaults; they do not restore v1/v2 behavior.
+Use new output paths; existing files are not overwritten.

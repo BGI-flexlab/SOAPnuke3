@@ -1,0 +1,28 @@
+[package]
+name = "soapnuke-rs"
+version = "3.0.0"
+edition = "2021"
+
+[features]
+default = []
+
+[lib]
+name = "soapnuke_api"
+path = "src/lib.rs"
+
+[[bin]]
+name = "SOAPnuke"
+path = "src/main.rs"
+
+[profile.release]
+opt-level = 3
+lto = "thin"
+codegen-units = 1
+debug = false
+
+[build-dependencies]
+
+[dependencies]
+memchr = "=2.8.3"
+serde_json = { version = "1", features = ["raw_value"] }
+serde = "=1.0.229"

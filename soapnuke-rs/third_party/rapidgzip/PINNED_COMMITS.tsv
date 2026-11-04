@@ -1,0 +1,3 @@
+component	version	commit	role
+rapidgzip	0.16.0	d2350e9c9ba54398cd64e45bfc8c631beec017f0	Parallel gzip reader
+librapidarchive	(submodule of rapidgzip)	1221a30bb548b305a69e5715f2bc348ba37ac243	File readers and decoded chunk storage

@@ -1,0 +1,98 @@
+SOAPnuke 3.0.0 dedup - Keep stable representatives of identical sequences
+
+Usage:
+  SOAPnuke dedup --r1 FILE [--r2 FILE] --out1 FILE [--out2 FILE]
+                 --spill-dir DIR --report FILE [options]
+  SOAPnuke dedup --r1 FILE --r2 FILE --out-interleaved FILE
+                 --spill-dir DIR --report FILE [options]
+
+Start here:
+  Read the full input; do not use filtering, trimming, sampling or prefixes.
+  SE keys are whole sequences; PE keys are ordered pairs of whole sequences.
+  Group keys ignore sequence case; output preserves original record content.
+  The earliest input unit represents each group. Each output keeps input order.
+  --spill-dir needs an existing scratch parent; --report is required.
+
+Input and configuration:
+  -1, --fq1 FILE                SE input or mate 1, plain or gzip; also --r1.
+                                Use '-' for stdin with --sample-id.
+  -2, --fq2 FILE                Separate mate 2; also --r2. No stdin here.
+  --interleaved [BOOL]          Alternating R1/R2 in --r1; excludes --r2.
+                                [false]
+  --lanes TSV                   Ordered lane_id, r1, r2 columns, tab-separated.
+                                Paths are relative to the TSV directory.
+                                Requires --sample-id; replaces r1/r2 input.
+  --input-format FORMAT         auto, fastq, gzip. [auto]
+  --input-phred INT             Quality encoding: 33 or 64. [33]
+  -Q, --qualSys INT             Encoding: 1 means +64; 2 means +33.
+  --sample-id TEXT              Run label. [input filename]
+                                Required with stdin or --lanes.
+  --config JSON                 Load {"job":"dedup","options":{...}}.
+                                CLI overrides config, then defaults.
+
+Grouping and scratch storage:
+  --key MODE                    Only full-sequence is supported.
+                                [full-sequence]
+  --spill-dir DIR               Required existing scratch parent. Dedup creates
+                                a unique child for its temporary files.
+                                Allow space for the full input and sort runs.
+
+Representative and duplicate output:
+  -C, --cleanFq1 FILE           Representative SE / R1; also --out1.
+                                Use out1/out2 OR --out-interleaved for PE.
+  -D, --cleanFq2 FILE           Representative R2 for split PE; also --out2.
+  --out-interleaved FILE        Paired representatives in alternating R1/R2.
+                                Use instead of --out1/--out2. [off]
+  --duplicates1 FILE            Optional original-order duplicate SE / R1.
+                                [off]
+  --duplicates2 FILE            Duplicate R2; required with --duplicates1
+                                for PE, including interleaved main output.
+  --output-format FORMAT        auto, fastq, gzip. [auto, based on suffix]
+  --output-phred INT            Output quality encoding: 33 or 64. [33]
+  --outQualSys INT              Output encoding: 1 means +64; 2 means +33.
+  -G                            Output Phred+33.
+  --gzip-level INT              Gzip compression level, 1..9. [4]
+                                Set explicitly only for gzip output.
+
+Reports and resources:
+  --report FILE                 Required new JSON report with final status.
+  --html-report FILE            Also write a local HTML summary. [off]
+  --resource-catalog JSON       Explicit local resource catalogue. [none]
+                                Does not download or select a database.
+  --progress-seconds INT        Stderr progress interval; 0 disables periodic
+                                updates, not the final event. [10]
+  --metrics [BOOL]              Include available runtime observations. [true]
+
+Threads and memory:
+  -T, --thread INT              Worker budget; also --threads.
+                                Default: 8, or the CPU limit if smaller.
+  --decoder MODE                auto, zlib, rapidgzip. [auto]
+                                Explicit rapidgzip needs a seekable gzip file
+                                and at least 14 threads; stdin uses zlib.
+  --memory-mib INT              Additional managed-buffer limit in MiB.
+                                Not a limit on total process memory. [none]
+
+Help:
+  -h, --help                    Show this help without processing.
+  -v, --version                 Show package/build version.
+
+Examples:
+  mkdir scratch
+  SOAPnuke dedup --r1 reads.fq.gz --out1 NEW_representatives.fq.gz \
+    --duplicates1 NEW_duplicates.fq.gz \
+    --spill-dir scratch --report NEW_dedup.json
+  SOAPnuke dedup --r1 r1.fq.gz --r2 r2.fq.gz \
+    --out1 NEW_rep.R1.fq.gz --out2 NEW_rep.R2.fq.gz \
+    --spill-dir scratch --report NEW_dedup.json
+
+  SOAPnuke dedup --r1 r1.fq.gz --r2 r2.fq.gz \
+    --out-interleaved NEW_rep.interleaved.fq.gz \
+    --spill-dir scratch --report NEW_interleaved.json
+
+Use new output/report paths with existing parents. Complete headers, sequence
+case and numeric qualities are preserved; changing encoding changes quality
+characters. Emitted qualities must fit the requested encoding; no clamping.
+This is exact sequence equality, not molecular duplicate inference. No Process
+filters or transformations are accepted. Temporary files are owned by the job;
+see docs/JOBS.md for storage costs, cleanup and failed-output behavior.
+Boolean values use true/false; --interleaved and --metrics may omit the value.

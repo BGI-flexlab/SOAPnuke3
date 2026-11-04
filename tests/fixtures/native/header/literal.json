@@ -1,0 +1,34 @@
+{
+  "a": {
+    "schema": "soapnuke-v3.resources/1",
+    "catalogue_version": null,
+    "sha256": "2dd6fa080e69de7d9a6d8795f6dc1a18635d14d5b778f6bab309089da9902966",
+    "path": "{ROOT}/catalogue-a.json"
+  },
+  "b": {
+    "schema": "soapnuke-v3.resources/1",
+    "catalogue_version": "r84-literal/1",
+    "sha256": "37cef2352f42dcc84598d7891d7dd8409c86d5763ab20dd912a9051ced33795c",
+    "path": "{ROOT}/catalogue-b.json"
+  },
+  "first": {
+    "lane_id": "L0000 \"<&",
+    "inputs": [
+      {
+        "role": "R1",
+        "phred": 33,
+        "codec": "plain"
+      }
+    ]
+  },
+  "last": {
+    "lane_id": "L1023 \"<&",
+    "inputs": [
+      {
+        "role": "R1",
+        "phred": 64,
+        "codec": "plain"
+      }
+    ]
+  }
+}

@@ -1,0 +1,102 @@
+SOAPnuke 3.0.0 demux - Route FASTQ reads to samples by barcode
+
+Usage:
+  SOAPnuke demux --r1 FILE [--r2 FILE] --samples TSV [barcode options]
+                 --out-dir DIR --report FILE [options]
+
+Start here:
+  One unit is one SE read or one paired-end (PE) pair.
+  The sample table names each sample and its one or two barcodes.
+  Inline mode captures positions in the reads; index mode reads I1/I2 files.
+  --out-dir must be new, with an existing parent; --report is required.
+  Matching uses Hamming distance. No ordinary Process filters are applied.
+
+Input and configuration:
+  -1, --fq1 FILE                SE input or mate 1, plain or gzip; also --r1.
+                                Use '-' for stdin with --sample-id.
+  -2, --fq2 FILE                Separate mate 2; also --r2. No stdin here.
+  --interleaved [BOOL]          Alternating R1/R2 in --r1; excludes --r2.
+                                [false]
+  --lanes TSV                   Ordered lane_id, r1, r2 columns, tab-separated.
+                                Paths are relative to the TSV directory.
+                                Requires --sample-id; replaces r1/r2 input.
+  --input-format FORMAT         auto, fastq, gzip. [auto]
+  --input-phred INT             Quality encoding: 33 or 64. [33]
+  -Q, --qualSys INT             Encoding: 1 means +64; 2 means +33.
+  --limit-units INT             Examine only the first INT complete units,
+                                across lanes; INT must be >=1. [all]
+  --sample-id TEXT              Run label. [input filename]
+                                Required with stdin or --lanes.
+  --config JSON                 Load {"job":"demux","options":{...}}.
+                                CLI overrides config, then defaults.
+
+Barcode capture and matching:
+  --samples TSV                 Required columns: sample, barcode1, barcode2.
+                                Leave barcode2 empty for a single barcode.
+                                Sample barcodes use A/C/G/T.
+  --barcode-source MODE         inline or index. [inline]
+  --barcode-r1 START:END        Inline R1 capture, 1-based inclusive positions.
+                                Required in inline mode; no default range.
+  --barcode-r2 START:END        Optional inline R2 capture; requires PE.
+  --i1 FILE                     First synchronized index input in index mode.
+  --i2 FILE                     Second index input; required if any sample has
+                                a nonempty barcode2. No stdin for I1/I2.
+  --barcode-errors INT          Maximum total Hamming distance, >=0. [0]
+                                Equal best sample matches are ambiguous.
+  --barcode-min-q VALUE         Minimum captured numeric quality: off or 0..93.
+                                [off]
+  --barcode-max-n INT           Maximum captured N bases, >=0. [0]
+  --barcode-remove [BOOL]       Remove captured inline positions. [false]
+                                Forbidden in index mode, even explicit false.
+
+Sample and auxiliary output:
+  -o, --outDir DIR              New sample output directory; also --out-dir.
+  --output-template TEXT        Per-sample names; {sample} and {mate} expand.
+                                [{sample}_R{mate}.fastq.gz]
+  --unassigned1 FILE            Optional unassigned SE / R1 output. [off]
+  --unassigned2 FILE            Unassigned R2; requires --unassigned1 and PE.
+  --ambiguous1 FILE             Optional ambiguous SE / R1 output. [off]
+  --ambiguous2 FILE             Ambiguous R2; requires --ambiguous1 and PE.
+  --output-format FORMAT        auto, fastq, gzip. [auto, based on suffix]
+  --output-phred INT            Output quality encoding: 33 or 64. [33]
+  --outQualSys INT              Output encoding: 1 means +64; 2 means +33.
+  -G                            Output Phred+33.
+  --gzip-level INT              Gzip compression level, 1..9. [4]
+                                Set explicitly only for gzip output.
+
+Reports and resources:
+  --report FILE                 Required new JSON report with final status.
+  --html-report FILE            Also write a local HTML summary. [off]
+  --resource-catalog JSON       Explicit local resource catalogue. [none]
+                                Does not download or select a database.
+  --progress-seconds INT        Stderr progress interval; 0 disables periodic
+                                updates, not the final event. [10]
+  --metrics [BOOL]              Include available runtime observations. [true]
+
+Threads and memory:
+  -T, --thread INT              Worker budget; also --threads.
+                                Default: 8, or the CPU limit if smaller.
+  --decoder MODE                auto, zlib, rapidgzip. [auto]
+                                Explicit rapidgzip needs a seekable gzip file
+                                and at least 14 threads; stdin uses zlib.
+  --memory-mib INT              Additional managed-buffer limit in MiB.
+                                Not a limit on total process memory. [none]
+
+Help:
+  -h, --help                    Show this help without processing.
+  -v, --version                 Show package/build version.
+
+Examples:
+  SOAPnuke demux --r1 reads.fq.gz --samples samples.tsv --barcode-r1 1:4 \
+    --barcode-remove --out-dir NEW_SAMPLES --report NEW_demux.json
+  SOAPnuke demux --r1 r1.fq.gz --r2 r2.fq.gz --samples samples.tsv \
+    --barcode-source index --i1 i1.fq.gz --i2 i2.fq.gz \
+    --out-dir NEW_SAMPLES --report NEW_demux.json
+
+Use new output/report paths and an existing parent directory. Omit I2 only
+when every barcode2 is empty. Capture lengths must match the sample table;
+index/read names and order must agree. Required sample files exist even when
+empty; unused optional auxiliary files remain absent. Outputs are not silently
+overwritten. Emitted qualities must fit the requested encoding; no clamping.
+Boolean flags accept --flag, --flag=true or --flag=false.
+See docs/JOBS.md for table/layout rules, limits and failure behavior.
