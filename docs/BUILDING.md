@@ -29,16 +29,16 @@ The same commands build natively on Linux x86-64. `JOBS` controls build concurre
 
 ## Install with Conda
 
-The Linux x86-64 and ARM64 Conda packages passed [native build, functional and fresh-installation tests](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41798313501). The [Bioconda recipe submission](https://github.com/bioconda/bioconda-recipes/pull/71175) is awaiting review; `conda install -c bioconda soapnuke3` is **not available yet**. Until channel publication, use the tested package from the GitHub release.
+The Linux x86-64 and ARM64 Conda packages passed [native build, functional and fresh-installation tests](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41802552250). The [Bioconda recipe submission](https://github.com/bioconda/bioconda-recipes/pull/71175) is awaiting review; `conda install -c bioconda soapnuke3` is **not available yet**. Until channel publication, use the tested package from the GitHub release.
 
 Download the package for the machine where it will run:
 
 | `uname -m` | Conda platform | Package |
 |---|---|---|
-| `x86_64` | `linux-64` | [soapnuke3-3.0.0-h9ff538f_0.conda](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/soapnuke3-3.0.0-h9ff538f_0.conda) |
-| `aarch64` | `linux-aarch64` | [soapnuke3-3.0.0-hd67b025_0.conda](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/soapnuke3-3.0.0-hd67b025_0.conda) |
+| `x86_64` | `linux-64` | [soapnuke3-3.0.0-h455febe_1.conda](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/soapnuke3-3.0.0-h455febe_1.conda) |
+| `aarch64` | `linux-aarch64` | [soapnuke3-3.0.0-h5912ae5_1.conda](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/soapnuke3-3.0.0-h5912ae5_1.conda) |
 
-Check the download against `SHA256SUMS-conda` on the [release page](https://github.com/BGI-flexlab/SOAPnuke3/releases/tag/v3.0.0). Both packages declare glibc 2.17 or newer. They use Conda's C++ and compression libraries; this differs from the standalone ARM archive's glibc 2.39 requirement. The native installation tests ran on Ubuntu 24.04, not every older Linux distribution.
+Check the download against `SHA256SUMS-conda-build1` on the [release page](https://github.com/BGI-flexlab/SOAPnuke3/releases/tag/v3.0.0). Both packages declare glibc 2.17 or newer. They use Conda's C++ and compression libraries; this differs from the standalone ARM archive's glibc 2.39 requirement. The native installation tests ran on Ubuntu 24.04, not every older Linux distribution.
 
 First create an environment with the package's runtime dependencies. This step matters because [installing a local Conda file does not automatically resolve dependencies](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/installing-with-conda.html#installing-conda-packages-offline):
 
@@ -52,19 +52,19 @@ Then install **one** file matching the current machine, from its download direct
 
 ```sh
 # Linux x86-64
-conda install --offline ./soapnuke3-3.0.0-h9ff538f_0.conda
+conda install --offline ./soapnuke3-3.0.0-h455febe_1.conda
 ```
 
 ```sh
 # Linux ARM64
-conda install --offline ./soapnuke3-3.0.0-hd67b025_0.conda
+conda install --offline ./soapnuke3-3.0.0-h5912ae5_1.conda
 ```
 
 Verify the installation with `SOAPnuke --version` and `SOAPnuke process --help`. Neither Rust nor a C/C++ compiler is needed to use these packages.
 
 ## Conda package builds
 
-The recipe in [`packaging/conda`](../packaging/conda/) builds the immutable 3.0.0 source archive with Conda's Rust/C/C++ compilers and zlib. The package name is `soapnuke3`; the installed command remains `SOAPnuke`.
+The recipe in [`packaging/conda`](../packaging/conda/) builds the immutable 3.0.0 source archive with Conda's Rust/C/C++ compilers and zlib. It applies a test-only synchronization patch so the CPU-permit contention test does not depend on thread scheduling; processing code and assertions are unchanged. The GitHub packages use Conda build number 1. The first Bioconda submission uses build number 0 as required for a new channel package, with the same source and test patch. The package name is `soapnuke3`; the installed command remains `SOAPnuke`.
 
 To build a package on either a Linux x86-64 or ARM64 machine, use a current checkout containing the recipe:
 
