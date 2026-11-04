@@ -10,25 +10,22 @@ On Ubuntu 24.04 ARM64, install the system build tools:
 
 ```sh
 sudo apt-get update
-sudo apt-get install build-essential cmake zlib1g-dev python3 curl
+sudo apt-get install build-essential cmake zlib1g-dev python3 curl git
 ```
 
 Install [Rust with rustup](https://rust-lang.org/tools/install/) if it is not already available, then select the tested toolchain for these commands:
 
 ```sh
 rustup toolchain install 1.99.1 --profile minimal
-curl -fL -o SOAPnuke-3.0.0-source.tar.gz \
-  https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/SOAPnuke-3.0.0-source.tar.gz
-echo '775913da4cc70926d8336bbc07e481626f2744192fe0009416b406ce35c78abb  SOAPnuke-3.0.0-source.tar.gz' | sha256sum -c -
-tar -xzf SOAPnuke-3.0.0-source.tar.gz
-cd SOAPnuke-3.0.0
+git clone --depth 1 https://github.com/BGI-flexlab/SOAPnuke3.git
+cd SOAPnuke3
 rustup run 1.99.1 make JOBS=2
 rustup run 1.99.1 make test JOBS=2 TEST_THREADS=2
 ./target/release/SOAPnuke --version
 export PATH="$PWD/target/release:$PATH"
 ```
 
-The same commands build natively on Linux x86-64. `JOBS` controls build concurrency, not the runtime `--threads` option. Cargo uses the vendored dependencies without downloading crates. The system tools and Rust installation need network access unless already installed. Use a fresh source directory for each architecture; cross-compilation is not the documented route.
+The same commands build natively on Linux x86-64. `JOBS` controls build concurrency, not the runtime `--threads` option. Cargo uses the vendored dependencies without downloading crates. The system tools and Rust installation need network access unless already installed. Use a fresh source directory for each architecture; cross-compilation is not the documented route. The maintained checkout includes a synchronization-only unit-test fix also applied by the Conda recipe; processing behavior is unchanged. The original 3.0.0 tag and source archive are preserved.
 
 ## Install with Conda
 

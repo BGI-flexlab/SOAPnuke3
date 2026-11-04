@@ -57,7 +57,12 @@ jobs:
           for path in files:
               digest = hashlib.sha256(path.read_bytes()).hexdigest()
               checksums.append(f'{digest}  {path.name}')
-          checksum = Path('.scratch') / ('SHA256SUMS-' + os.environ['PACKAGE_KIND'])
+          suffix = os.environ['PACKAGE_KIND']
+          if suffix == 'conda':
+              builds = {path.stem.rsplit('_', 1)[1] for path in files}
+              assert len(builds) == 1
+              suffix += '-build' + builds.pop()
+          checksum = Path('.scratch') / ('SHA256SUMS-' + suffix)
           checksum.write_text('\n'.join(checksums) + '\n')
           subprocess.run(['gh', 'release', 'upload', 'v3.0.0', *map(str, files), str(checksum)], check=True)
           print('\n'.join(checksums))
