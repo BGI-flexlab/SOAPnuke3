@@ -6,6 +6,8 @@ mkdir -p "$TMPDIR"
 # Native C++ compilation must use the Conda zlib headers and libraries.
 export CPATH="$PREFIX/include${CPATH:+:$CPATH}"
 export LIBRARY_PATH="$PREFIX/lib${LIBRARY_PATH:+:$LIBRARY_PATH}"
+# CMake's explicit CMAKE_AR setting needs the archiver's absolute path.
+export AR="$(command -v "$AR")"
 
 ./scripts/cargo.sh build --release --locked --offline --jobs "${CPU_COUNT:-2}"
 ./scripts/cargo.sh test --release --locked --offline --jobs "${CPU_COUNT:-2}" --lib -- --test-threads=1
