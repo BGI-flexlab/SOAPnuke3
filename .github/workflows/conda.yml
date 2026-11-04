@@ -1,0 +1,53 @@
+name: Build and test Conda packages
+
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'packaging/conda/**'
+      - '.github/workflows/conda.yml'
+
+permissions:
+  contents: read
+
+jobs:
+  conda:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-24.04
+            platform: linux-64
+          - runner: ubuntu-24.04-arm
+            platform: linux-aarch64
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 45
+    defaults:
+      run:
+        shell: bash -el {0}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: conda-incubator/setup-miniconda@v3
+        with:
+          miniforge-version: latest
+          channels: conda-forge
+          conda-remove-defaults: true
+          activate-environment: packaging
+          python-version: '3.12'
+      - name: Build and test in isolated environments
+        run: |
+          mkdir -p .scratch/tmp .scratch/conda-bld
+          export TMPDIR="$GITHUB_WORKSPACE/.scratch/tmp"
+          conda install -y conda-build=26.9.1
+          conda build packaging/conda --override-channels -c conda-forge \
+            --no-anaconda-upload --croot "$GITHUB_WORKSPACE/.scratch/conda-bld" \
+            2>&1 | tee .scratch/conda-build.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: soapnuke3-conda-${{ matrix.platform }}
+          include-hidden-files: true
+          path: |
+            .scratch/conda-bld/${{ matrix.platform }}/soapnuke3-*.conda
+            .scratch/conda-bld/${{ matrix.platform }}/soapnuke3-*.tar.bz2
+            .scratch/conda-build.log
