@@ -40,7 +40,7 @@ jobs:
           mkdir -p .scratch/tmp .scratch/conda-bld
           export TMPDIR="$GITHUB_WORKSPACE/.scratch/tmp"
           conda install -y conda-build=26.9.1 2>&1 | tee .scratch/conda-build.log
-          conda build packaging/conda --override-channels -c conda-forge \
+          python -m conda build packaging/conda --override-channels -c conda-forge \
             --no-anaconda-upload --croot "$GITHUB_WORKSPACE/.scratch/conda-bld" \
             2>&1 | tee -a .scratch/conda-build.log
       - name: Summarize build failure
