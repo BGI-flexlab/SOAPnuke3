@@ -14,9 +14,18 @@ SOAPnuke processes short-read FASTQ data with a Rust core and native compression
 
 This repository is separate from [SOAPnuke v1/v2](https://github.com/BGI-flexlab/SOAPnuke). Interfaces, defaults and supported workflows differ; see the [migration guide](docs/MIGRATION.md).
 
-## Build
+## Install or build
 
-Download the [prebuilt Linux x86-64 release](https://github.com/BGI-flexlab/SOAPnuke3/releases/tag/v3.0.0), or build from source with Rust/Cargo 1.99.1, C, C++17, CMake, Make and zlib development headers. Python 3.10+ is needed for build identity and tests. A minimum Rust version has not been established. Locked Rust dependencies, libdeflate and rapidgzip sources are included; Cargo downloads and submodule initialization are unnecessary.
+Choose the download matching `uname -m`:
+
+| Linux machine | Download |
+|---|---|
+| `x86_64` (Intel/AMD) | [Linux x86-64 executable](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/SOAPnuke-3.0.0-linux-x86_64.tar.gz) |
+| `aarch64` (ARM64 server) | [Linux ARM64 executable](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/SOAPnuke-3.0.0-linux-aarch64.tar.gz) |
+
+Extract the archive and run `./bin/SOAPnuke --version` inside it. Checksums are on the [release page](https://github.com/BGI-flexlab/SOAPnuke3/releases/tag/v3.0.0). The ARM64 download is tested natively on Ubuntu 24.04 and requires **glibc 2.39+** plus the C++ runtime and zlib. Build from source on older Linux systems. Linux ARM64 is not a macOS or 32-bit ARM build.
+
+For source builds, use Rust/Cargo 1.99.1, C, C++17, CMake, Make and zlib development headers. Python 3.10+ is needed for build identity and tests. A minimum Rust version has not been established. Locked Rust dependencies, libdeflate and rapidgzip sources are included; Cargo downloads and submodule initialization are unnecessary. Follow the [step-by-step Linux ARM64 instructions](docs/BUILDING.md#linux-arm64-source-build), or use the same native build commands on Linux x86-64:
 
 ```sh
 make JOBS=2
@@ -25,6 +34,8 @@ export PATH="$PWD/target/release:$PATH"
 ```
 
 See [building and tests](docs/BUILDING.md). Build jobs and processing threads are separate settings. Portable or byte-identical binary rebuilds are not promised.
+
+**Conda packages are available for Linux x86-64 and ARM64:** follow the [installation instructions](docs/BUILDING.md#install-with-conda). The package is named `soapnuke3` and installs the command `SOAPnuke`. [Bioconda submission](https://github.com/bioconda/bioconda-recipes/pull/71175) is awaiting review; the package is not yet available from that channel. The same guide includes [building the Conda packages from source](docs/BUILDING.md#conda-package-builds).
 
 ## Quick start
 

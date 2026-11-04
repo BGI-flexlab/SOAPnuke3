@@ -1,4 +1,92 @@
-# Build and portable tests
+# Installation, builds and portable tests
+
+## Linux ARM64 source build
+
+Build natively on the ARM64 server. `uname -m` should print `aarch64` (also called ARM64); an x86-64 executable cannot run natively there. Linux ARM64 support does not imply macOS or 32-bit ARM support.
+
+The 3.0.0 source passed `make test` on a [native Ubuntu 24.04 ARM64 runner](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41795521134), including the slow test, command-line checks and owned-library examples. The [ARM64 download](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/SOAPnuke-3.0.0-linux-aarch64.tar.gz) comes from that successful build. It requires glibc 2.39+, `GLIBCXX_3.4.30`, `CXXABI_1.3.13`, and zlib; compile natively on an older system instead. This establishes functional build support, not ARM performance or scaling claims.
+
+On Ubuntu 24.04 ARM64, install the system build tools:
+
+```sh
+sudo apt-get update
+sudo apt-get install build-essential cmake zlib1g-dev python3 curl
+```
+
+Install [Rust with rustup](https://rust-lang.org/tools/install/) if it is not already available, then select the tested toolchain for these commands:
+
+```sh
+rustup toolchain install 1.99.1 --profile minimal
+curl -fL -o SOAPnuke-3.0.0-source.tar.gz \
+  https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/SOAPnuke-3.0.0-source.tar.gz
+echo '775913da4cc70926d8336bbc07e481626f2744192fe0009416b406ce35c78abb  SOAPnuke-3.0.0-source.tar.gz' | sha256sum -c -
+tar -xzf SOAPnuke-3.0.0-source.tar.gz
+cd SOAPnuke-3.0.0
+rustup run 1.99.1 make JOBS=2
+rustup run 1.99.1 make test JOBS=2 TEST_THREADS=2
+./target/release/SOAPnuke --version
+export PATH="$PWD/target/release:$PATH"
+```
+
+The same commands build natively on Linux x86-64. `JOBS` controls build concurrency, not the runtime `--threads` option. Cargo uses the vendored dependencies without downloading crates. The system tools and Rust installation need network access unless already installed. Use a fresh source directory for each architecture; cross-compilation is not the documented route.
+
+## Install with Conda
+
+The Linux x86-64 and ARM64 Conda packages passed [native build, functional and fresh-installation tests](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41798313501). The [Bioconda recipe submission](https://github.com/bioconda/bioconda-recipes/pull/71175) is awaiting review; `conda install -c bioconda soapnuke3` is **not available yet**. Until channel publication, use the tested package from the GitHub release.
+
+Download the package for the machine where it will run:
+
+| `uname -m` | Conda platform | Package |
+|---|---|---|
+| `x86_64` | `linux-64` | [soapnuke3-3.0.0-h9ff538f_0.conda](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/soapnuke3-3.0.0-h9ff538f_0.conda) |
+| `aarch64` | `linux-aarch64` | [soapnuke3-3.0.0-hd67b025_0.conda](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/soapnuke3-3.0.0-hd67b025_0.conda) |
+
+Check the download against `SHA256SUMS-conda` on the [release page](https://github.com/BGI-flexlab/SOAPnuke3/releases/tag/v3.0.0). Both packages declare glibc 2.17 or newer. They use Conda's C++ and compression libraries; this differs from the standalone ARM archive's glibc 2.39 requirement. The native installation tests ran on Ubuntu 24.04, not every older Linux distribution.
+
+First create an environment with the package's runtime dependencies. This step matters because [installing a local Conda file does not automatically resolve dependencies](https://docs.conda.io/projects/conda/en/latest/user-guide/concepts/installing-with-conda.html#installing-conda-packages-offline):
+
+```sh
+conda create -n soapnuke3 --override-channels -c conda-forge \
+  'libgcc>=16' 'libstdcxx>=16' 'libzlib>=1.3.2,<2.0a0' zlib
+conda activate soapnuke3
+```
+
+Then install **one** file matching the current machine, from its download directory:
+
+```sh
+# Linux x86-64
+conda install --offline ./soapnuke3-3.0.0-h9ff538f_0.conda
+```
+
+```sh
+# Linux ARM64
+conda install --offline ./soapnuke3-3.0.0-hd67b025_0.conda
+```
+
+Verify the installation with `SOAPnuke --version` and `SOAPnuke process --help`. Neither Rust nor a C/C++ compiler is needed to use these packages.
+
+## Conda package builds
+
+The recipe in [`packaging/conda`](../packaging/conda/) builds the immutable 3.0.0 source archive with Conda's Rust/C/C++ compilers and zlib. The package name is `soapnuke3`; the installed command remains `SOAPnuke`.
+
+To build a package on either a Linux x86-64 or ARM64 machine, use a current checkout containing the recipe:
+
+```sh
+conda create -n soapnuke3-packaging --override-channels -c conda-forge conda-build=26.9.1
+conda activate soapnuke3-packaging
+mkdir -p .scratch/tmp .scratch/conda-bld
+export TMPDIR="$PWD/.scratch/tmp"
+python -m conda build packaging/conda --override-channels -c conda-forge \
+  --no-anaconda-upload --croot "$PWD/.scratch/conda-bld"
+conda create -n soapnuke3 --override-channels -c conda-forge \
+  -c "file://$PWD/.scratch/conda-bld" soapnuke3=3.0.0
+conda activate soapnuke3
+SOAPnuke --version
+```
+
+The recipe runs native unit tests and the Process, module and adapter-overlap test cases before packaging. Conda then installs the package into a separate test environment and checks the commands and an actual filtering result. A completed local build does not mean the package is already on Bioconda: [Bioconda publication requires review and a successful channel build](https://bioconda.github.io/contributor/workflow.html).
+
+## Maintained test suite
 
 Build on Linux with the tested Rust/Cargo 1.99.1, C/C++17, CMake, Make, zlib headers and Python3.10+. Toolchain/system libraries are external; minimum Rust version and byte-identical/portable binaries are not promised. Rust dependencies and native compression sources are vendored and locked. Large real-data and timing inputs are not needed or included.
 

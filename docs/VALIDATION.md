@@ -2,7 +2,7 @@
 
 The maintained source test route is `make test JOBS=2 TEST_THREADS=2`. It includes native tests, portable Process and standalone-command CLI suites, the explicit long mutation test and two linked owned-library examples. Authored fixtures are bundled; see [building](BUILDING.md). The [machine-readable release validation summary](validation-summary.json) records the formal build identity, checks and limits. The optional pinned fastp differential check and dependency integration route are documented there.
 
-## Formal 3.0.0 build checks
+## Formal 3.0.0 Linux x86-64 build checks
 
 The formal executable reports build ID `soapnuke-3.0.0` and has SHA256 `17f371826e6b7435a8c017bc95f7762838486f21892e0303451e4b606e0831c8`. Its source manifest SHA256 is `709cb22cbfbb53d057154097e0d649ef0f06b0dc25c78762b0f4dd7af158e813`. These identities distinguish the release build from inherited measurements.
 
@@ -17,6 +17,12 @@ The formal executable reports build ID `soapnuke-3.0.0` and has SHA256 `17f37182
 | Interactive guide | Local Chromium checked 25 operation panels across five commands, adapter-overlap SE/PE off/on states and mobile layout; no JavaScript errors or network requests. Offline ZIP contains the same HTML bytes. |
 
 This resource check is one paired comparison per cell, not a timing campaign or a general performance estimate. The maintained tests and bounded real-read calls do not establish full-WGS, all-parameter, scaling, or downstream biological qualification.
+
+## Linux ARM64 and Conda packages
+
+The same 3.0.0 source passed the full maintained `make test` route on a [native Ubuntu 24.04 ARM64 runner](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41795521134): 318 normal native tests, the separate 120-second test, portable CLI and adapter-overlap checks, and both linked owned-library examples. The standalone ARM executable has SHA256 `ed3ed5892c49fd42b576d1e43ca5bd1efbc5e362f618b3d14adb3db28e26e5f0`.
+
+The downloadable [Linux x86-64 and ARM64 Conda packages](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41798313501) each passed 318 native tests, portable CLI and adapter-overlap checks, then installation into a fresh Conda test environment with help/version and an actual filtering assertion. The package tests do not include the separately run 120-second test. Source algorithms and bundled libraries are unchanged; the native toolchain and runtime-library packaging differ. See [installation and compatibility requirements](BUILDING.md). These platform checks do not extend the x86-64 release's real-data or performance measurements to ARM.
 
 ## Additional inherited study
 
