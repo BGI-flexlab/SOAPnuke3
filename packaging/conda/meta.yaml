@@ -50,5 +50,7 @@ about:
   summary: Fast FASTQ processing, demultiplexing, deduplication and quality reporting
 
 extra:
+  recipe-maintainers:
+    - youngchan919
   additional-platforms:
     - linux-aarch64

@@ -1,0 +1,68 @@
+name: Publish tested Linux packages
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: Successful ARM64 or Conda build run in this repository
+        required: true
+      kind:
+        description: Package kind
+        type: choice
+        options: [arm64, conda]
+        required: true
+  push:
+    paths:
+      - '.github/workflows/publish-linux-packages.yml'
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  publish:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    env:
+      GH_TOKEN: ${{ github.token }}
+      GH_REPO: ${{ github.repository }}
+      BUILD_RUN: ${{ inputs.run_id }}
+      PACKAGE_KIND: ${{ inputs.kind }}
+    steps:
+      - name: Download successful build artifacts
+        run: |
+          mkdir -p .scratch/tmp .scratch/artifacts
+          export TMPDIR="$GITHUB_WORKSPACE/.scratch/tmp"
+          gh api "repos/$GH_REPO/actions/runs/$BUILD_RUN" > .scratch/run.json
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          run = json.loads(Path('.scratch/run.json').read_text())
+          expected = {'arm64': 'Build and test Linux ARM64', 'conda': 'Build and test Conda packages'}
+          assert run['conclusion'] == 'success'
+          assert run['name'] == expected[os.environ['PACKAGE_KIND']]
+          assert run['repository']['full_name'] == os.environ['GH_REPO']
+          PY
+          gh run download "$BUILD_RUN" --dir .scratch/artifacts
+      - name: Publish additional 3.0.0 assets without replacing existing files
+        run: |
+          python3 - <<'PY'
+          import hashlib, json, os, subprocess
+          from pathlib import Path
+          root = Path('.scratch/artifacts')
+          if os.environ['PACKAGE_KIND'] == 'arm64':
+              files = list(root.rglob('SOAPnuke-3.0.0-linux-aarch64.tar.gz'))
+              assert len(files) == 1
+          else:
+              files = list(root.rglob('soapnuke3-3.0.0-*.conda'))
+              assert len(files) == 2
+          checksums = []
+          for path in files:
+              digest = hashlib.sha256(path.read_bytes()).hexdigest()
+              checksums.append(f'{digest}  {path.name}')
+          checksum = Path('.scratch') / ('SHA256SUMS-' + os.environ['PACKAGE_KIND'])
+          checksum.write_text('\n'.join(checksums) + '\n')
+          subprocess.run(['gh', 'release', 'upload', 'v3.0.0', *map(str, files), str(checksum)], check=True)
+          print('\n'.join(checksums))
+          PY

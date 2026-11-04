@@ -36,12 +36,23 @@ jobs:
           python-version: '3.12'
       - name: Build and test in isolated environments
         run: |
+          set -euo pipefail
           mkdir -p .scratch/tmp .scratch/conda-bld
           export TMPDIR="$GITHUB_WORKSPACE/.scratch/tmp"
-          conda install -y conda-build=26.9.1
+          conda install -y conda-build=26.9.1 2>&1 | tee .scratch/conda-build.log
           conda build packaging/conda --override-channels -c conda-forge \
             --no-anaconda-upload --croot "$GITHUB_WORKSPACE/.scratch/conda-bld" \
-            2>&1 | tee .scratch/conda-build.log
+            2>&1 | tee -a .scratch/conda-build.log
+      - name: Summarize build failure
+        if: failure()
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          log = Path('.scratch/conda-build.log')
+          if log.exists():
+              tail = '\n'.join(log.read_text(errors='replace').splitlines()[-25:])
+              print('::error title=Conda build failure::' + tail.replace('%', '%25').replace('\r', '%0D').replace('\n', '%0A'))
+          PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
