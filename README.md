@@ -60,6 +60,48 @@ The JSON report is `clean-output/SOAPnuke.json`. These thresholds are examples, 
 - A resource catalogue is optional for direct adapter/reference paths. `id:ID` and the `resources` actions require an explicit catalogue. Nothing is downloaded or selected implicitly.
 - `dedup` needs the full input and a scratch directory. Exact sequence equality is a computational duplicate definition, not molecular duplicate truth.
 
+## HG002 whole-genome benchmark
+
+We compared six tools on the complete **430,952,721-pair HG002 WGS dataset** (58.144 GB of compressed input, approximately 41.6× nominal depth), with three preprocessing runs at each of 8, 16 and 32 allocated physical cores.
+
+At 32 cores, SOAPnuke 3.0.0 completed in **6.27 minutes**, compared with **8.46 minutes for fastp 1.4.0**: **25.8% less elapsed time**. Median peak RSS was **0.225 GiB**, compared with **0.533 GiB** for fastp. These are results for this dataset and the explicit profiles below.
+
+![Six-tool HG002 preprocessing throughput, peak memory and effective CPU use across 8, 16 and 32 allocated cores](docs/benchmarks/hg002-wgs-20261105/figures/preprocessing_scaling.svg)
+
+Lines show three-run medians; faint points show individual observations. Throughput uses **compressed-input MB/s**. Memory uses a logarithmic axis; CPU is measured effective cores, not requested threads.
+
+### Preprocessing at 32 cores
+
+| Tool | Wall time (s) | CPU (%) | Peak RSS (GiB) | Input (MB/s) | Retained pairs |
+| --- | --- | --- | --- | --- | --- |
+| SOAPnuke 3.0.0 | 376.49 | 1,223.0 | 0.225 | 154.44 | 430,883,998 |
+| SOAPnuke 2.1.10 | 1,201.45 | 3,135.4 | 8.530 | 48.39 | 430,883,993 |
+| SOAPnuke 1.6.5 | 11,833.00 | 234.1 | 0.647 | 4.91 | 430,883,993 |
+| fastp 1.4.0 | 507.37 | 1,157.6 | 0.533 | 114.60 | 430,889,028 |
+| Trimmomatic 0.41 | 15,475.00 | 161.5 | 9.749 | 3.76 | 430,889,593 |
+| Cutadapt 5.2 | 751.98 | 806.4 | 0.081 | 77.32 | 429,492,691 |
+
+CPU 100% represents one effective core. Each metric is its own three-run median. See [all 18 cells and ranges](docs/benchmarks/hg002-wgs-20261105/RESULTS.md) and [all 54 observations](docs/benchmarks/hg002-wgs-20261105/data/preprocessing_54_observations.tsv).
+
+SOAPnuke3, fastp, Trimmomatic and Cutadapt used gzip level 4; v1/v2 retained their historical native compression settings. Trimmomatic and Cutadapt performed quality-end trimming, while the SOAPnuke and fastp profiles used read filtering. Exact parameters and boundary differences are in the [methods](docs/benchmarks/hg002-wgs-20261105/METHODS.md).
+
+### Downstream variant-calling accuracy
+
+Retained paired reads entered a common BWA-MEM2 → GATK duplicate marking/BQSR → HaplotypeCaller → hard-filtering workflow. SNP and INDEL calls were evaluated with hap.py/RTG vcfeval against **GIAB HG002 GRCh38 v4.2.1** in the same confident regions.
+
+| Tool | SNP precision (%) | SNP recall (%) | SNP F1 (%) | INDEL precision (%) | INDEL recall (%) | INDEL F1 (%) |
+| --- | --- | --- | --- | --- | --- | --- |
+| Cutadapt 5.2 | 99.6849 | 98.0568 | 98.8641 | 99.4418 | 99.0469 | 99.2440 |
+| SOAPnuke 3.0.0 | 99.6876 | 98.0504 | 98.8622 | 99.4573 | 99.0279 | 99.2422 |
+| SOAPnuke 1.6.5 | 99.6883 | 98.0510 | 98.8629 | 99.4559 | 99.0273 | 99.2411 |
+| SOAPnuke 2.1.10 | 99.6875 | 98.0505 | 98.8622 | 99.4568 | 99.0277 | 99.2418 |
+| fastp 1.4.0 | 99.6880 | 98.0505 | 98.8625 | 99.4562 | 99.0277 | 99.2415 |
+| Trimmomatic 0.41 | 99.6879 | 98.0485 | 98.8614 | 99.4559 | 99.0300 | 99.2425 |
+
+These results show closely similar observed calling accuracy on this sample. The differences are small and describe this single sample. [Download the accuracy table as SVG](docs/benchmarks/hg002-wgs-20261105/figures/variant_accuracy_table.svg). Formal SOAPnuke 3.0.0 and fastp 1.4.0 calling results were reused after both retained input mates were confirmed byte-identical to the already analyzed files.
+
+All measurements used a shared dual-socket Xeon Gold 6442Y host and Lustre storage. CPU placement and measurement dates differ across campaign stages; cores were not exclusively reserved. See the [complete methods, commands and provenance](docs/benchmarks/hg002-wgs-20261105/METHODS.md) for the scope and reproducibility details.
+
 ## Documentation and validation
 
 - [Process and algorithm guide](docs/USAGE.md), [Demux/Dedup/report guide](docs/JOBS.md), [Rust API](docs/API.md), [resources](docs/RESOURCES.md), [architecture](docs/ARCHITECTURE.md)
@@ -70,7 +112,7 @@ The JSON report is `clean-output/SOAPnuke.json`. These thresholds are examples, 
 make test JOBS=2 TEST_THREADS=2
 ```
 
-The maintained route runs native tests, portable CLI suites and owned-library examples. It does not establish full-WGS, all-parameter, scaling, or downstream biological qualification. [Validation](docs/VALIDATION.md) documents test coverage, datasets and measured costs.
+The maintained route runs native tests, portable CLI suites and owned-library examples. The separate WGS study above reports preprocessing measurements and downstream results for one explicit profile; it does not establish all-parameter or universal biological qualification. [Validation](docs/VALIDATION.md) documents the maintained test coverage, datasets and measured costs.
 
 ## License
 

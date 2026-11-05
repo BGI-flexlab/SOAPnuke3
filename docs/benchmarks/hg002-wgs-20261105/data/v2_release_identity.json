@@ -1,0 +1,11 @@
+{
+  "display_version": "SOAPnuke 2.1.10",
+  "measured_version": "SOAPnuke 2.1.9+percentile-fix+qc-length-fix",
+  "measured_source_commit": "569c46138b8f4a46feaa6164ef861c0e4740ddac",
+  "measured_executable_sha256": "d47c1994a6f45790075d565e5bb0b300e0e5652aa421faad58972be8f4b2ea13",
+  "release_source_commit": "5fcd4045a7b7196cb1efe8dd6d624e8b234e7818",
+  "release_executable_sha256": "397ab70bd10dfb7d85db96de9773529e36ead7b757979d478fd1dc3f5f28a74e",
+  "production_difference": "version metadata only",
+  "new_timed_runs_for_version_rename": 0,
+  "original_benchmark_records_modified": false
+}

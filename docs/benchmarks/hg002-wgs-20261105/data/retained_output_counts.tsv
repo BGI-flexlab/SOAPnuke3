@@ -1,0 +1,7 @@
+arm	tool	retained_pairs	fastq_records_both_mates	discarded_input_pairs	r1_sequence_bases	r2_sequence_bases	combined_sequence_bases	r1_compressed_bytes	r2_compressed_bytes	base_count_evidence
+v165	SOAPnuke 1.6.5	430883993	861767986	68728	64548618997	64549431378	129098050375	31282874917	30731637684	Native Basic_Statistics_of_Sequencing_Quality.txt, total bases, clean R1/R2
+v219_fixed	SOAPnuke 2.1.10	430883993	861767986	68728	64548618997	64549431378	129098050375	34688692124	34029302169	Native Basic_Statistics_of_Sequencing_Quality.txt, total bases, clean R1/R2
+soapnuke300	SOAPnuke 3.0.0	430883998	861767996	68723	64548619487	64549431858	129098051345	30969661281	30383223142	Complete new full-output scan plus native-report reconciliation
+fastp140	fastp 1.4.0	430889028	861778056	63693	64548863124	64549656035	129098519159	30930831760	30344698325	Complete new full-output scan plus native-report reconciliation
+trimmomatic	Trimmomatic 0.41	430889593	861779186	63128	64525317979	64516023675	129041341654	32359300316	31749884000	Saved complete decompressed-output scan in validation.json
+cutadapt	Cutadapt 5.2	429492691	858985382	1460030	64174539581	64111723682	128286263263	30177432618	29556183481	Saved complete decompressed-output scan in validation.json

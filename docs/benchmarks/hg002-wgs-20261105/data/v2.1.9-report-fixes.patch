@@ -1,0 +1,1119 @@
+diff --git a/src/gc.cpp b/src/gc.cpp
+index 9295b9f..cb65910 100644
+--- a/src/gc.cpp
++++ b/src/gc.cpp
+@@ -70,10 +70,10 @@ quartile_result cal_quar_from_array(uint64_t data[], int len)
+ 	// cout<<len<<"\there"<<endl;
+ 	quartile_result return_value;
+ 	unsigned long long total_num(0);
+-	int data_num(0);
++	uint64_t data_num(0);
+ 	for (int i = 0; i <= len; i++)
+ 	{
+-		total_num += i * data[i];
++		total_num += static_cast<uint64_t>(i) * data[i];
+ 		data_num += data[i];
+ 	}
+ 	if (data_num == 0)
+@@ -84,12 +84,12 @@ quartile_result cal_quar_from_array(uint64_t data[], int len)
+ 	{
+ 		return_value.mean = total_num / data_num;
+ 	}
+-	int lower_pos = data_num / 4;
+-	int upper_pos = data_num * 3 / 4;
+-	int first10_pos = data_num / 10;
+-	int last10_pos = data_num * 9 / 10;
+-	int median_pos = data_num / 2;
+-	int last_cur_pos(0), cur_pos(0);
++	uint64_t lower_pos = data_num / 4;
++	uint64_t upper_pos = (data_num / 4) * 3 + ((data_num % 4) * 3) / 4;
++	uint64_t first10_pos = data_num / 10;
++	uint64_t last10_pos = (data_num / 10) * 9 + ((data_num % 10) * 9) / 10;
++	uint64_t median_pos = data_num / 2;
++	uint64_t last_cur_pos(0), cur_pos(0);
+ 	for (int i = 0; i <= len; i++)
+ 	{
+ 		cur_pos += data[i];
+diff --git a/src/global_variable.cpp b/src/global_variable.cpp
+index 812c459..0da0be6 100644
+--- a/src/global_variable.cpp
++++ b/src/global_variable.cpp
+@@ -3,6 +3,7 @@
+ C_general_stat::C_general_stat()
+ {
+ 	read_max_length = 0;
++	trim_position_max = 0;
+ 	read_length = 0;
+ 	reads_number = 0;
+ 	base_number = 0;
+@@ -40,8 +41,8 @@ C_reads_pos_qual_stat::C_reads_pos_qual_stat(C_global_parameter &gp)
+ {
+ 	for (int i = 0; i != READ_MAX_LEN; i++)
+ 	{
+-		position_qual[i] = new uint64_t[gp.maxBaseQuality];
+-		for (int j = 0; j != gp.maxBaseQuality; j++)
++		position_qual[i] = new uint64_t[gp.maxBaseQuality + 1];
++		for (int j = 0; j <= gp.maxBaseQuality; j++)
+ 		{
+ 			position_qual[i][j] = 0;
+ 		}
+@@ -50,7 +51,7 @@ C_reads_pos_qual_stat::C_reads_pos_qual_stat(C_global_parameter &gp)
+ 
+ C_reads_trim_stat::C_reads_trim_stat()
+ {
+-	for (int i = 0; i != READ_MAX_LEN; i++)
++	for (int i = 0; i <= READ_MAX_LEN; i++)
+ 	{
+ 		hlq[i] = 0;
+ 		ht[i] = 0;
+@@ -99,4 +100,4 @@ C_global_variable::C_global_variable(C_global_parameter &gp)
+ 	trim2_stat = C_fastq_file_stat(gp);
+ 	clean1_stat = C_fastq_file_stat(gp);
+ 	clean2_stat = C_fastq_file_stat(gp);
+-}
+\ No newline at end of file
++}
+diff --git a/src/global_variable.h b/src/global_variable.h
+index 32b5787..e2fd4af 100644
+--- a/src/global_variable.h
++++ b/src/global_variable.h
+@@ -61,6 +61,7 @@ public:
+ 		polyG_num = polyG_num1 = polyG_num2 = polyG_num_overlap = 0;
+ 		readsNumWithstLFRbarcode = 0;
+ 		dupReadsNum = 0;
++		filtered_bases1 = filtered_bases2 = 0;
+ 	};
+ 	// uint64_t output_reads_num;
+ 	uint64_t in_adapter_list_num;
+@@ -84,12 +85,14 @@ public:
+ 	uint64_t readsNumWithstLFRbarcode;
+ 	set<string> stLFRbarcodeNum;
+ 	uint64_t dupReadsNum;
++	uint64_t filtered_bases1, filtered_bases2;
+ };
+ class C_general_stat
+ {
+ public:
+ 	C_general_stat();
+ 	uint64_t read_max_length;
++	uint64_t trim_position_max;
+ 	uint64_t read_length;
+ 	uint64_t reads_number;
+ 	uint64_t base_number;
+@@ -119,8 +122,8 @@ class C_reads_trim_stat
+ {
+ public:
+ 	C_reads_trim_stat();
+-	uint64_t hlq[READ_MAX_LEN], ht[READ_MAX_LEN];
+-	uint64_t ta[READ_MAX_LEN], tlq[READ_MAX_LEN], tt[READ_MAX_LEN];
++	uint64_t hlq[READ_MAX_LEN + 1], ht[READ_MAX_LEN + 1];
++	uint64_t ta[READ_MAX_LEN + 1], tlq[READ_MAX_LEN + 1], tt[READ_MAX_LEN + 1];
+ };
+ class C_fastq_file_stat
+ {
+diff --git a/src/peprocess.cpp b/src/peprocess.cpp
+index cb6ea96..d1a7a47 100644
+--- a/src/peprocess.cpp
++++ b/src/peprocess.cpp
+@@ -328,6 +328,13 @@ void peProcess::print_stat()
+ 	char clean_r1[7][100];
+ 	char raw_r2[7][100];
+ 	char clean_r2[7][100];
++	for (int i = 0; i < 7; i++)
++	{
++		sprintf(raw_r1[i], "0.00");
++		sprintf(clean_r1[i], "0.00");
++		sprintf(raw_r2[i], "0.00");
++		sprintf(clean_r2[i], "0.00");
++	}
+ 	/*for(int i=0;i!=7;i++){
+ 		raw_r1[i]={0};
+ 		clean_r1[i]={0};
+@@ -384,9 +391,9 @@ void peProcess::print_stat()
+ 	of_general_stat << "Total number of reads\t" << setprecision(15) << gv.raw1_stat.gs.reads_number << " (100.00%)\t" << gv.clean1_stat.gs.reads_number << " (100.00%)\t" << gv.raw2_stat.gs.reads_number << " (100.00%)\t" << gv.clean2_stat.gs.reads_number << " (100.00%)" << endl;
+ 	of_general_stat << "Number of filtered reads\t" << total_filter_fq1_num << " (" << filter_r1_ratio << "%)\t-\t" << total_filter_fq1_num << " (" << filter_r2_ratio << "%)\t-" << endl;
+ 	of_general_stat << "Total number of bases\t" << setprecision(15) << gv.raw1_stat.gs.base_number << " (100.00%)\t" << gv.clean1_stat.gs.base_number << " (100.00%)\t" << gv.raw2_stat.gs.base_number << " (100.00%)\t" << gv.clean2_stat.gs.base_number << " (100.00%)" << endl;
+-	uint64_t filter_base1 = total_filter_fq1_num * gv.raw1_stat.gs.read_length;
+-	uint64_t filter_base2 = total_filter_fq1_num * gv.raw1_stat.gs.read_length;
+-	of_general_stat << "Number of filtered bases\t" << setprecision(15) << filter_base1 << " (" << filter_r1_ratio << "%)\t-\t" << filter_base2 << " (" << filter_r2_ratio << "%)\t-" << endl;
++	uint64_t filter_base1 = gv.fs.filtered_bases1;
++	uint64_t filter_base2 = gv.fs.filtered_bases2;
++	of_general_stat << "Number of filtered bases\t" << setprecision(15) << filter_base1 << " (" << setiosflags(ios::fixed) << setprecision(2) << (gv.raw1_stat.gs.base_number ? 100.0 * filter_base1 / gv.raw1_stat.gs.base_number : 0.0) << "%)\t-\t" << filter_base2 << " (" << (gv.raw2_stat.gs.base_number ? 100.0 * filter_base2 / gv.raw2_stat.gs.base_number : 0.0) << "%)\t-" << endl;
+ 	of_general_stat << "Number of base A\t" << setprecision(15) << gv.raw1_stat.gs.a_number << " (" << raw_r1[0] << "%)\t" << gv.clean1_stat.gs.a_number << " (" << clean_r1[0] << "%)\t" << gv.raw2_stat.gs.a_number << " (" << raw_r2[0] << "%)\t" << gv.clean2_stat.gs.a_number << " (" << clean_r2[0] << "%)" << endl;
+ 	of_general_stat << "Number of base C\t" << setprecision(15) << gv.raw1_stat.gs.c_number << " (" << raw_r1[1] << "%)\t" << gv.clean1_stat.gs.c_number << " (" << clean_r1[1] << "%)\t" << gv.raw2_stat.gs.c_number << " (" << raw_r2[1] << "%)\t" << gv.clean2_stat.gs.c_number << " (" << clean_r2[1] << "%)" << endl;
+ 	of_general_stat << "Number of base G\t" << setprecision(15) << gv.raw1_stat.gs.g_number << " (" << raw_r1[2] << "%)\t" << gv.clean1_stat.gs.g_number << " (" << clean_r1[2] << "%)\t" << gv.raw2_stat.gs.g_number << " (" << raw_r2[2] << "%)\t" << gv.clean2_stat.gs.g_number << " (" << clean_r2[2] << "%)" << endl;
+@@ -413,10 +420,8 @@ void peProcess::print_stat()
+ 	of_general_stat.close();
+ 	of_readPos_base_stat1 << "Pos\tA\tC\tG\tT\tN\tclean A\tclean C\tclean G\tclean T\tclean N" << endl;
+ 	of_readPos_base_stat2 << "Pos\tA\tC\tG\tT\tN\tclean A\tclean C\tclean G\tclean T\tclean N" << endl;
+-	for (uint64_t i = 0; i < gv.raw1_stat.gs.read_length; i++)
++	for (uint64_t i = 0; i < max(gv.raw1_stat.gs.read_max_length, gv.raw2_stat.gs.read_max_length); i++)
+ 	{
+-		of_readPos_base_stat1 << i + 1 << "\t";
+-		of_readPos_base_stat2 << i + 1 << "\t";
+ 		string base_set = "ACGTN";
+ 		float raw1_cur_pos_total_base = 0;
+ 		float clean1_cur_pos_total_base = 0;
+@@ -429,13 +434,16 @@ void peProcess::print_stat()
+ 			clean1_cur_pos_total_base += gv.clean1_stat.bs.position_acgt_content[i][j];
+ 			clean2_cur_pos_total_base += gv.clean2_stat.bs.position_acgt_content[i][j];
+ 		}
++		if (i < gv.raw1_stat.gs.read_max_length)
++		{
++			of_readPos_base_stat1 << i + 1 << "\t";
+ 		for (uint64_t j = 0; j != base_set.size(); j++)
+ 		{
+-			of_readPos_base_stat1 << setiosflags(ios::fixed) << setprecision(2) << 100 * (float)gv.raw1_stat.bs.position_acgt_content[i][j] / raw1_cur_pos_total_base << "%\t";
++			of_readPos_base_stat1 << setiosflags(ios::fixed) << setprecision(2) << (raw1_cur_pos_total_base ? 100 * (float)gv.raw1_stat.bs.position_acgt_content[i][j] / raw1_cur_pos_total_base : 0) << "%\t";
+ 		}
+ 		for (uint64_t j = 0; j != base_set.size(); j++)
+ 		{
+-			of_readPos_base_stat1 << setiosflags(ios::fixed) << setprecision(2) << 100 * (float)gv.clean1_stat.bs.position_acgt_content[i][j] / clean1_cur_pos_total_base << "%";
++			of_readPos_base_stat1 << setiosflags(ios::fixed) << setprecision(2) << (clean1_cur_pos_total_base ? 100 * (float)gv.clean1_stat.bs.position_acgt_content[i][j] / clean1_cur_pos_total_base : 0) << "%";
+ 			if (base_set[j] != 'N')
+ 			{
+ 				of_readPos_base_stat1 << "\t";
+@@ -445,13 +453,17 @@ void peProcess::print_stat()
+ 				of_readPos_base_stat1 << endl;
+ 			}
+ 		}
++		}
++		if (i < gv.raw2_stat.gs.read_max_length)
++		{
++			of_readPos_base_stat2 << i + 1 << "\t";
+ 		for (uint64_t j = 0; j != base_set.size(); j++)
+ 		{
+-			of_readPos_base_stat2 << setiosflags(ios::fixed) << setprecision(2) << 100 * (float)gv.raw2_stat.bs.position_acgt_content[i][j] / raw2_cur_pos_total_base << "%\t";
++			of_readPos_base_stat2 << setiosflags(ios::fixed) << setprecision(2) << (raw2_cur_pos_total_base ? 100 * (float)gv.raw2_stat.bs.position_acgt_content[i][j] / raw2_cur_pos_total_base : 0) << "%\t";
+ 		}
+ 		for (uint64_t j = 0; j != base_set.size(); j++)
+ 		{
+-			of_readPos_base_stat2 << setiosflags(ios::fixed) << setprecision(2) << 100 * (float)gv.clean2_stat.bs.position_acgt_content[i][j] / clean2_cur_pos_total_base << "%";
++			of_readPos_base_stat2 << setiosflags(ios::fixed) << setprecision(2) << (clean2_cur_pos_total_base ? 100 * (float)gv.clean2_stat.bs.position_acgt_content[i][j] / clean2_cur_pos_total_base : 0) << "%";
+ 			if (base_set[j] != 'N')
+ 			{
+ 				of_readPos_base_stat2 << "\t";
+@@ -461,6 +473,7 @@ void peProcess::print_stat()
+ 				of_readPos_base_stat2 << endl;
+ 			}
+ 		}
++		}
+ 	}
+ 	of_readPos_base_stat1.close();
+ 	of_readPos_base_stat2.close();
+@@ -470,11 +483,11 @@ void peProcess::print_stat()
+ 	of_readPos_qual_stat1 << "Pos\t";
+ 	of_readPos_qual_stat2 << "Pos\t";
+ 	int max_qual = 0;
+-	for (uint64_t i = 0; i < gv.raw1_stat.gs.read_length; i++)
++	for (uint64_t i = 0; i < max(gv.raw1_stat.gs.read_max_length, gv.raw2_stat.gs.read_max_length); i++)
+ 	{
+ 		for (uint64_t j = 1; j <= gp.maxBaseQuality; j++)
+ 		{
+-			if (gv.raw1_stat.qs.position_qual[i][j] > 0)
++			if (gv.raw1_stat.qs.position_qual[i][j] > 0 || gv.raw2_stat.qs.position_qual[i][j] > 0 || gv.clean1_stat.qs.position_qual[i][j] > 0 || gv.clean2_stat.qs.position_qual[i][j] > 0)
+ 			{
+ 				max_qual = max_qual > j ? max_qual : j;
+ 			}
+@@ -498,8 +511,10 @@ void peProcess::print_stat()
+ 	float *clean2_q30 = new float[readMaxLength];
+ 	for (uint64_t i = 0; i != readMaxLength; i++)
+ 	{
+-		of_readPos_qual_stat1 << i + 1 << "\t";
+-		of_readPos_qual_stat2 << i + 1 << "\t";
++		if (i < gv.raw1_stat.gs.read_max_length)
++			of_readPos_qual_stat1 << i + 1 << "\t";
++		if (i < gv.raw2_stat.gs.read_max_length)
++			of_readPos_qual_stat2 << i + 1 << "\t";
+ 		uint64_t raw1_q20_num(0), raw1_q30_num(0), raw1_total(0);
+ 		uint64_t raw2_q20_num(0), raw2_q30_num(0), raw2_total(0);
+ 		// int pos_max_qual1(0),pos_max_qual2(0);
+@@ -516,24 +531,30 @@ void peProcess::print_stat()
+ 				raw2_q30_num += gv.raw2_stat.qs.position_qual[i][j];
+ 			}
+ 			raw1_total += gv.raw1_stat.qs.position_qual[i][j];
+-			of_readPos_qual_stat1 << setiosflags(ios::fixed);
+-			of_readPos_qual_stat1 << setprecision(0) << gv.raw1_stat.qs.position_qual[i][j] << "\t";
++			if (i < gv.raw1_stat.gs.read_max_length)
++				of_readPos_qual_stat1 << setiosflags(ios::fixed) << setprecision(0) << gv.raw1_stat.qs.position_qual[i][j] << "\t";
+ 			raw2_total += gv.raw2_stat.qs.position_qual[i][j];
+-			of_readPos_qual_stat2 << setiosflags(ios::fixed);
+-			of_readPos_qual_stat2 << setprecision(0) << gv.raw2_stat.qs.position_qual[i][j] << "\t";
++			if (i < gv.raw2_stat.gs.read_max_length)
++				of_readPos_qual_stat2 << setiosflags(ios::fixed) << setprecision(0) << gv.raw2_stat.qs.position_qual[i][j] << "\t";
+ 		}
+ 		// cout<<max_qual<<"\t"<<pos_max_qual1<<"\t"<<pos_max_qual2<<endl;
+ 		// exit(1);
+-		raw1_q20[i] = (float)raw1_q20_num / raw1_total;
+-		raw1_q30[i] = (float)raw1_q30_num / raw1_total;
+-		raw2_q20[i] = (float)raw2_q20_num / raw2_total;
+-		raw2_q30[i] = (float)raw2_q30_num / raw2_total;
+-		quartile_result raw1_quar = cal_quar_from_array(gv.raw1_stat.qs.position_qual[i], max_qual);
+-		quartile_result raw2_quar = cal_quar_from_array(gv.raw2_stat.qs.position_qual[i], max_qual); // lower_quar,upper_quar
+-		of_readPos_qual_stat1 << setiosflags(ios::fixed) << setprecision(2) << raw1_quar.mean << "\t";
+-		of_readPos_qual_stat1 << setprecision(0) << raw1_quar.median << "\t" << raw1_quar.lower_quar << "\t" << raw1_quar.upper_quar << "\t" << raw1_quar.first10_quar << "\t" << raw1_quar.last10_quar << endl;
+-		of_readPos_qual_stat2 << setiosflags(ios::fixed) << setprecision(2) << raw2_quar.mean << "\t";
+-		of_readPos_qual_stat2 << setprecision(0) << raw2_quar.median << "\t" << raw2_quar.lower_quar << "\t" << raw2_quar.upper_quar << "\t" << raw2_quar.first10_quar << "\t" << raw2_quar.last10_quar << endl;
++		raw1_q20[i] = raw1_total ? (float)raw1_q20_num / raw1_total : 0;
++		raw1_q30[i] = raw1_total ? (float)raw1_q30_num / raw1_total : 0;
++		raw2_q20[i] = raw2_total ? (float)raw2_q20_num / raw2_total : 0;
++		raw2_q30[i] = raw2_total ? (float)raw2_q30_num / raw2_total : 0;
++		if (i < gv.raw1_stat.gs.read_max_length)
++		{
++			quartile_result raw1_quar = cal_quar_from_array(gv.raw1_stat.qs.position_qual[i], max_qual);
++			of_readPos_qual_stat1 << setiosflags(ios::fixed) << setprecision(2) << raw1_quar.mean << "\t";
++			of_readPos_qual_stat1 << setprecision(0) << raw1_quar.median << "\t" << raw1_quar.lower_quar << "\t" << raw1_quar.upper_quar << "\t" << raw1_quar.first10_quar << "\t" << raw1_quar.last10_quar << endl;
++		}
++		if (i < gv.raw2_stat.gs.read_max_length)
++		{
++			quartile_result raw2_quar = cal_quar_from_array(gv.raw2_stat.qs.position_qual[i], max_qual);
++			of_readPos_qual_stat2 << setiosflags(ios::fixed) << setprecision(2) << raw2_quar.mean << "\t";
++			of_readPos_qual_stat2 << setprecision(0) << raw2_quar.median << "\t" << raw2_quar.lower_quar << "\t" << raw2_quar.upper_quar << "\t" << raw2_quar.first10_quar << "\t" << raw2_quar.last10_quar << endl;
++		}
+ 	}
+ 	of_readPos_qual_stat1 << "#clean fastq1 quality distribution" << endl;
+ 	of_readPos_qual_stat2 << "#clean fastq2 quality distribution" << endl;
+@@ -551,8 +572,10 @@ void peProcess::print_stat()
+ 	of_q2030_stat2 << "Position in reads\tPercentage of Q20+ bases\tPercentage of Q30+ bases\tPercentage of Clean Q20+\tPercentage of Clean Q30+" << endl;
+ 	for (uint64_t i = 0; i != readMaxLength; i++)
+ 	{
+-		of_readPos_qual_stat1 << i + 1 << "\t";
+-		of_readPos_qual_stat2 << i + 1 << "\t";
++		if (i < gv.clean1_stat.gs.read_max_length)
++			of_readPos_qual_stat1 << i + 1 << "\t";
++		if (i < gv.clean2_stat.gs.read_max_length)
++			of_readPos_qual_stat2 << i + 1 << "\t";
+ 		uint64_t clean1_q20_num(0), clean1_q30_num(0), clean1_total(0);
+ 		uint64_t clean2_q20_num(0), clean2_q30_num(0), clean2_total(0);
+ 		for (uint64_t j = 0; j <= max_qual; j++)
+@@ -567,26 +590,34 @@ void peProcess::print_stat()
+ 				clean1_q30_num += gv.clean1_stat.qs.position_qual[i][j];
+ 				clean2_q30_num += gv.clean2_stat.qs.position_qual[i][j];
+ 			}
+-			of_readPos_qual_stat1 << setiosflags(ios::fixed);
+ 			clean1_total += gv.clean1_stat.qs.position_qual[i][j];
+-			of_readPos_qual_stat1 << setprecision(0) << gv.clean1_stat.qs.position_qual[i][j] << "\t";
++			if (i < gv.clean1_stat.gs.read_max_length)
++				of_readPos_qual_stat1 << setiosflags(ios::fixed) << setprecision(0) << gv.clean1_stat.qs.position_qual[i][j] << "\t";
+ 			clean2_total += gv.clean2_stat.qs.position_qual[i][j];
+-			of_readPos_qual_stat2 << setiosflags(ios::fixed);
+-			of_readPos_qual_stat2 << setprecision(0) << gv.clean2_stat.qs.position_qual[i][j] << "\t";
++			if (i < gv.clean2_stat.gs.read_max_length)
++				of_readPos_qual_stat2 << setiosflags(ios::fixed) << setprecision(0) << gv.clean2_stat.qs.position_qual[i][j] << "\t";
+ 		}
+-		clean1_q20[i] = (float)clean1_q20_num / clean1_total;
+-		clean1_q30[i] = (float)clean1_q30_num / clean1_total;
+-		clean2_q20[i] = (float)clean2_q20_num / clean2_total;
+-		clean2_q30[i] = (float)clean2_q30_num / clean2_total;
++		clean1_q20[i] = clean1_total ? (float)clean1_q20_num / clean1_total : 0;
++		clean1_q30[i] = clean1_total ? (float)clean1_q30_num / clean1_total : 0;
++		clean2_q20[i] = clean2_total ? (float)clean2_q20_num / clean2_total : 0;
++		clean2_q30[i] = clean2_total ? (float)clean2_q30_num / clean2_total : 0;
+ 		// cout<<i<<"\t"<<max_qual<<"\tmax qual3\t"<<max_qual-1<<"\t"<<max_qual+1<<"\t"<<max_qual+2<<endl;
+-		quartile_result clean1_quar = cal_quar_from_array(gv.clean1_stat.qs.position_qual[i], max_qual);
+-		quartile_result clean2_quar = cal_quar_from_array(gv.clean2_stat.qs.position_qual[i], max_qual); // lower_quar,upper_quar
+-		of_readPos_qual_stat1 << setiosflags(ios::fixed) << setprecision(2) << clean1_quar.mean << "\t";
+-		of_readPos_qual_stat1 << setprecision(0) << clean1_quar.median << "\t" << clean1_quar.lower_quar << "\t" << clean1_quar.upper_quar << "\t" << clean1_quar.first10_quar << "\t" << clean1_quar.last10_quar << endl;
+-		of_readPos_qual_stat2 << setiosflags(ios::fixed) << setprecision(2) << clean2_quar.mean << "\t";
+-		of_readPos_qual_stat2 << setprecision(0) << clean2_quar.median << "\t" << clean2_quar.lower_quar << "\t" << clean2_quar.upper_quar << "\t" << clean2_quar.first10_quar << "\t" << clean2_quar.last10_quar << endl;
+-		of_q2030_stat1 << i + 1 << setiosflags(ios::fixed) << setprecision(2) << "\t" << 100 * raw1_q20[i] << "%\t" << 100 * raw1_q30[i] << "%\t" << 100 * clean1_q20[i] << "%\t" << 100 * clean1_q30[i] << "%" << endl;
+-		of_q2030_stat2 << i + 1 << setiosflags(ios::fixed) << setprecision(2) << "\t" << 100 * raw2_q20[i] << "%\t" << 100 * raw2_q30[i] << "%\t" << 100 * clean2_q20[i] << "%\t" << 100 * clean2_q30[i] << "%" << endl;
++		if (i < gv.clean1_stat.gs.read_max_length)
++		{
++			quartile_result clean1_quar = cal_quar_from_array(gv.clean1_stat.qs.position_qual[i], max_qual);
++			of_readPos_qual_stat1 << setiosflags(ios::fixed) << setprecision(2) << clean1_quar.mean << "\t";
++			of_readPos_qual_stat1 << setprecision(0) << clean1_quar.median << "\t" << clean1_quar.lower_quar << "\t" << clean1_quar.upper_quar << "\t" << clean1_quar.first10_quar << "\t" << clean1_quar.last10_quar << endl;
++		}
++		if (i < gv.clean2_stat.gs.read_max_length)
++		{
++			quartile_result clean2_quar = cal_quar_from_array(gv.clean2_stat.qs.position_qual[i], max_qual);
++			of_readPos_qual_stat2 << setiosflags(ios::fixed) << setprecision(2) << clean2_quar.mean << "\t";
++			of_readPos_qual_stat2 << setprecision(0) << clean2_quar.median << "\t" << clean2_quar.lower_quar << "\t" << clean2_quar.upper_quar << "\t" << clean2_quar.first10_quar << "\t" << clean2_quar.last10_quar << endl;
++		}
++		if (i < gv.raw1_stat.gs.read_max_length)
++			of_q2030_stat1 << i + 1 << setiosflags(ios::fixed) << setprecision(2) << "\t" << 100 * raw1_q20[i] << "%\t" << 100 * raw1_q30[i] << "%\t" << 100 * clean1_q20[i] << "%\t" << 100 * clean1_q30[i] << "%" << endl;
++		if (i < gv.raw2_stat.gs.read_max_length)
++			of_q2030_stat2 << i + 1 << setiosflags(ios::fixed) << setprecision(2) << "\t" << 100 * raw2_q20[i] << "%\t" << 100 * raw2_q30[i] << "%\t" << 100 * clean2_q20[i] << "%\t" << 100 * clean2_q30[i] << "%" << endl;
+ 	}
+ 	delete[] raw1_q20;
+ 	delete[] raw1_q30;
+@@ -604,7 +635,7 @@ void peProcess::print_stat()
+ 	of_trim_stat2 << "Pos\tHeadLowQual\tHeadFixLen\tTailAdapter\tTailLowQual\tTailFixLen\tCleanHeadLowQual\tCleanHeadFixLen\tCleanTailAdapter\tCleanTailLowQual\tCleanTailFixLen" << endl;
+ 	uint64_t head_total1(0), tail_total1(0), head_total2(0), tail_total2(0);
+ 	uint64_t head_total_clean1(0), tail_total_clean1(0), head_total_clean2(0), tail_total_clean2(0);
+-	for (uint64_t i = 0; i < gv.raw1_stat.gs.read_length; i++)
++	for (uint64_t i = 1; i <= max(gv.raw1_stat.gs.trim_position_max, gv.raw2_stat.gs.trim_position_max); i++)
+ 	{
+ 		head_total1 += gv.raw1_stat.ts.ht[i] + gv.raw1_stat.ts.hlq[i];
+ 		tail_total1 += gv.raw1_stat.ts.ta[i] + gv.raw1_stat.ts.tlq[i] + gv.raw1_stat.ts.tt[i];
+@@ -617,8 +648,10 @@ void peProcess::print_stat()
+ 		// of_trim_stat1<<i+1<<"\t"<<gv.trim1_stat.ts.hlq[i]<<"\t"<<gv.trim1_stat.ts.ht[i]<<"\t"<<gv.trim1_stat.ts.ta[i]
+ 	}
+ 	// cout<<head_total_clean1<<"\t"<<tail_total_clean1<<"\t"<<head_total_clean2<<"\t"<<tail_total_clean2<<endl;
+-	for (uint64_t i = 1; i <= gv.raw1_stat.gs.read_length; i++)
++	for (uint64_t i = 1; i <= max(gv.raw1_stat.gs.trim_position_max, gv.raw2_stat.gs.trim_position_max); i++)
+ 	{
++		if (i <= gv.raw1_stat.gs.trim_position_max)
++		{
+ 		of_trim_stat1 << i << "\t";
+ 		if (head_total1 > 0)
+ 		{
+@@ -665,6 +698,9 @@ void peProcess::print_stat()
+ 			of_trim_stat1 << gv.clean1_stat.ts.tlq[i] << "\t0.00%" << endl;
+ 		}
+ 
++		}
++		if (i <= gv.raw2_stat.gs.trim_position_max)
++		{
+ 		of_trim_stat2 << i << "\t";
+ 		if (head_total2 > 0)
+ 		{
+@@ -710,6 +746,7 @@ void peProcess::print_stat()
+ 			of_trim_stat2 << gv.clean2_stat.ts.tlq[i] << "\t0.00%\t";
+ 			of_trim_stat2 << gv.clean2_stat.ts.tlq[i] << "\t0.00%" << endl;
+ 		}
++		}
+ 	}
+ 	of_trim_stat1.close();
+ 	of_trim_stat2.close();
+@@ -735,9 +772,9 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 	{
+ 		if (gv.raw1_stat.gs.read_length == 0)
+ 			gv.raw1_stat.gs.read_length = fq1s_stat.gs.read_length; // generate stat
+-		if (gv.raw1_stat.gs.read_max_length < fq1s_stat.gs.read_length)
++		if (gv.raw1_stat.gs.read_max_length < fq1s_stat.gs.read_max_length)
+ 		{
+-			gv.raw1_stat.gs.read_max_length = fq1s_stat.gs.read_length;
++			gv.raw1_stat.gs.read_max_length = fq1s_stat.gs.read_max_length;
+ 		}
+ 
+ 		gv.raw1_stat.gs.reads_number += fq1s_stat.gs.reads_number;
+@@ -752,9 +789,9 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 
+ 		if (gv.raw2_stat.gs.read_length == 0)
+ 			gv.raw2_stat.gs.read_length = fq2s_stat.gs.read_length;
+-		if (gv.raw2_stat.gs.read_max_length < fq2s_stat.gs.read_length)
++		if (gv.raw2_stat.gs.read_max_length < fq2s_stat.gs.read_max_length)
+ 		{
+-			gv.raw2_stat.gs.read_max_length = fq2s_stat.gs.read_length;
++			gv.raw2_stat.gs.read_max_length = fq2s_stat.gs.read_max_length;
+ 		}
+ 		gv.raw2_stat.gs.reads_number += fq2s_stat.gs.reads_number;
+ 		gv.raw2_stat.gs.base_number += fq2s_stat.gs.base_number;
+@@ -768,44 +805,56 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 
+ 		string base_set = "ACGTN"; // base content and quality along read position stat
+ 		int max_qual = 0;
+-		for (uint64_t i = 0; i != gv.raw1_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < max(fq1s_stat.gs.read_max_length, fq2s_stat.gs.read_max_length); i++)
+ 		{
+ 			for (uint64_t j = 0; j != base_set.size(); j++)
+ 			{
+-				gv.raw1_stat.bs.position_acgt_content[i][j] += fq1s_stat.bs.position_acgt_content[i][j];
+-				gv.raw2_stat.bs.position_acgt_content[i][j] += fq2s_stat.bs.position_acgt_content[i][j];
++				if (i < fq1s_stat.gs.read_max_length)
++					gv.raw1_stat.bs.position_acgt_content[i][j] += fq1s_stat.bs.position_acgt_content[i][j];
++				if (i < fq2s_stat.gs.read_max_length)
++					gv.raw2_stat.bs.position_acgt_content[i][j] += fq2s_stat.bs.position_acgt_content[i][j];
+ 			}
+ 		}
+-		for (uint64_t i = 0; i != gv.raw1_stat.gs.read_max_length; i++)
++		gv.raw1_stat.gs.trim_position_max = max(gv.raw1_stat.gs.trim_position_max, fq1s_stat.gs.trim_position_max);
++		gv.raw2_stat.gs.trim_position_max = max(gv.raw2_stat.gs.trim_position_max, fq2s_stat.gs.trim_position_max);
++		for (uint64_t i = 1; i <= max(fq1s_stat.gs.trim_position_max, fq2s_stat.gs.trim_position_max); i++)
+ 		{
+-			gv.raw1_stat.ts.ht[i] += fq1s_stat.ts.ht[i];
+-			gv.raw1_stat.ts.hlq[i] += fq1s_stat.ts.hlq[i];
+-			gv.raw1_stat.ts.tt[i] += fq1s_stat.ts.tt[i];
+-			gv.raw1_stat.ts.tlq[i] += fq1s_stat.ts.tlq[i];
+-			gv.raw1_stat.ts.ta[i] += fq1s_stat.ts.ta[i];
+-			gv.raw2_stat.ts.ht[i] += fq2s_stat.ts.ht[i];
+-			gv.raw2_stat.ts.hlq[i] += fq2s_stat.ts.hlq[i];
+-			gv.raw2_stat.ts.tt[i] += fq2s_stat.ts.tt[i];
+-			gv.raw2_stat.ts.tlq[i] += fq2s_stat.ts.tlq[i];
+-			gv.raw2_stat.ts.ta[i] += fq2s_stat.ts.ta[i];
++			if (i <= fq1s_stat.gs.trim_position_max)
++			{
++				gv.raw1_stat.ts.ht[i] += fq1s_stat.ts.ht[i];
++				gv.raw1_stat.ts.hlq[i] += fq1s_stat.ts.hlq[i];
++				gv.raw1_stat.ts.tt[i] += fq1s_stat.ts.tt[i];
++				gv.raw1_stat.ts.tlq[i] += fq1s_stat.ts.tlq[i];
++				gv.raw1_stat.ts.ta[i] += fq1s_stat.ts.ta[i];
++			}
++			if (i <= fq2s_stat.gs.trim_position_max)
++			{
++				gv.raw2_stat.ts.ht[i] += fq2s_stat.ts.ht[i];
++				gv.raw2_stat.ts.hlq[i] += fq2s_stat.ts.hlq[i];
++				gv.raw2_stat.ts.tt[i] += fq2s_stat.ts.tt[i];
++				gv.raw2_stat.ts.tlq[i] += fq2s_stat.ts.tlq[i];
++				gv.raw2_stat.ts.ta[i] += fq2s_stat.ts.ta[i];
++			}
+ 		}
+-		for (uint64_t i = 0; i != gv.raw1_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < max(fq1s_stat.gs.read_max_length, fq2s_stat.gs.read_max_length); i++)
+ 		{
+ 			for (uint64_t j = 1; j <= gp.maxBaseQuality; j++)
+ 			{
+-				if (fq1s_stat.qs.position_qual[i][j] > 0)
++				if ((i < fq1s_stat.gs.read_max_length && fq1s_stat.qs.position_qual[i][j] > 0) || (i < fq2s_stat.gs.read_max_length && fq2s_stat.qs.position_qual[i][j] > 0))
+ 				{
+ 					max_qual = max_qual > j ? max_qual : j;
+ 				}
+ 			}
+ 		}
+ 		// cout<<max_qual<<endl;
+-		for (uint64_t i = 0; i != gv.raw1_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < max(fq1s_stat.gs.read_max_length, fq2s_stat.gs.read_max_length); i++)
+ 		{
+ 			for (uint64_t j = 0; j <= max_qual; j++)
+ 			{
+-				gv.raw1_stat.qs.position_qual[i][j] += fq1s_stat.qs.position_qual[i][j];
+-				gv.raw2_stat.qs.position_qual[i][j] += fq2s_stat.qs.position_qual[i][j];
++				if (i < fq1s_stat.gs.read_max_length)
++					gv.raw1_stat.qs.position_qual[i][j] += fq1s_stat.qs.position_qual[i][j];
++				if (i < fq2s_stat.gs.read_max_length)
++					gv.raw2_stat.qs.position_qual[i][j] += fq2s_stat.qs.position_qual[i][j];
+ 			}
+ 		}
+ 		// gv.fs.output_reads_num+=fs_stat.output_reads_num;	//filter stat
+@@ -863,6 +912,8 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 		gv.fs.include_global_contam_seq_num1 += fs_stat.include_global_contam_seq_num1;
+ 		gv.fs.include_global_contam_seq_num2 += fs_stat.include_global_contam_seq_num2;
+ 		gv.fs.include_global_contam_seq_num_overlap += fs_stat.include_global_contam_seq_num_overlap;
++		gv.fs.filtered_bases1 += fs_stat.filtered_bases1;
++		gv.fs.filtered_bases2 += fs_stat.filtered_bases2;
+ 		if (gp.module_name == "filterStLFR")
+ 		{
+ 			gv.fs.readsNumWithstLFRbarcode += fs_stat.readsNumWithstLFRbarcode;
+@@ -886,9 +937,9 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 		{
+ 			gv.trim1_stat.gs.read_length = gv.trim1_stat.gs.base_number / gv.trim1_stat.gs.reads_number;
+ 		}
+-		if (gv.trim1_stat.gs.read_max_length < fq1s_stat.gs.read_length)
++		if (gv.trim1_stat.gs.read_max_length < fq1s_stat.gs.read_max_length)
+ 		{
+-			gv.trim1_stat.gs.read_max_length = fq1s_stat.gs.read_length;
++			gv.trim1_stat.gs.read_max_length = fq1s_stat.gs.read_max_length;
+ 		}
+ 		gv.trim1_stat.gs.a_number += fq1s_stat.gs.a_number;
+ 		gv.trim1_stat.gs.c_number += fq1s_stat.gs.c_number;
+@@ -909,9 +960,9 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 		{
+ 			gv.trim2_stat.gs.read_length = gv.trim2_stat.gs.base_number / gv.trim2_stat.gs.reads_number;
+ 		}
+-		if (gv.trim2_stat.gs.read_max_length < fq2s_stat.gs.read_length)
++		if (gv.trim2_stat.gs.read_max_length < fq2s_stat.gs.read_max_length)
+ 		{
+-			gv.trim2_stat.gs.read_max_length = fq2s_stat.gs.read_length;
++			gv.trim2_stat.gs.read_max_length = fq2s_stat.gs.read_max_length;
+ 		}
+ 		gv.trim2_stat.gs.a_number += fq2s_stat.gs.a_number;
+ 		gv.trim2_stat.gs.c_number += fq2s_stat.gs.c_number;
+@@ -922,30 +973,55 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 		gv.trim2_stat.gs.q30_num += fq2s_stat.gs.q30_num;
+ 		int max_qual(0);
+ 		string base_set = "ACGTN"; // base content and quality along read position stat
+-		for (uint64_t i = 0; i != gv.trim1_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < max(fq1s_stat.gs.read_max_length, fq2s_stat.gs.read_max_length); i++)
+ 		{
+ 			for (uint64_t j = 0; j != base_set.size(); j++)
+ 			{
+-				gv.trim1_stat.bs.position_acgt_content[i][j] += fq1s_stat.bs.position_acgt_content[i][j];
+-				gv.trim2_stat.bs.position_acgt_content[i][j] += fq2s_stat.bs.position_acgt_content[i][j];
++				if (i < fq1s_stat.gs.read_max_length)
++					gv.trim1_stat.bs.position_acgt_content[i][j] += fq1s_stat.bs.position_acgt_content[i][j];
++				if (i < fq2s_stat.gs.read_max_length)
++					gv.trim2_stat.bs.position_acgt_content[i][j] += fq2s_stat.bs.position_acgt_content[i][j];
++			}
++		}
++		gv.trim1_stat.gs.trim_position_max = max(gv.trim1_stat.gs.trim_position_max, fq1s_stat.gs.trim_position_max);
++		gv.trim2_stat.gs.trim_position_max = max(gv.trim2_stat.gs.trim_position_max, fq2s_stat.gs.trim_position_max);
++		for (uint64_t i = 1; i <= max(fq1s_stat.gs.trim_position_max, fq2s_stat.gs.trim_position_max); i++)
++		{
++			if (i <= fq1s_stat.gs.trim_position_max)
++			{
++				gv.trim1_stat.ts.ht[i] += fq1s_stat.ts.ht[i];
++				gv.trim1_stat.ts.hlq[i] += fq1s_stat.ts.hlq[i];
++				gv.trim1_stat.ts.tt[i] += fq1s_stat.ts.tt[i];
++				gv.trim1_stat.ts.tlq[i] += fq1s_stat.ts.tlq[i];
++				gv.trim1_stat.ts.ta[i] += fq1s_stat.ts.ta[i];
++			}
++			if (i <= fq2s_stat.gs.trim_position_max)
++			{
++				gv.trim2_stat.ts.ht[i] += fq2s_stat.ts.ht[i];
++				gv.trim2_stat.ts.hlq[i] += fq2s_stat.ts.hlq[i];
++				gv.trim2_stat.ts.tt[i] += fq2s_stat.ts.tt[i];
++				gv.trim2_stat.ts.tlq[i] += fq2s_stat.ts.tlq[i];
++				gv.trim2_stat.ts.ta[i] += fq2s_stat.ts.ta[i];
+ 			}
+ 		}
+-		for (uint64_t i = 0; i != gv.trim1_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < max(fq1s_stat.gs.read_max_length, fq2s_stat.gs.read_max_length); i++)
+ 		{
+ 			for (uint64_t j = 1; j <= gp.maxBaseQuality; j++)
+ 			{
+-				if (fq1s_stat.qs.position_qual[i][j] > 0)
++				if ((i < fq1s_stat.gs.read_max_length && fq1s_stat.qs.position_qual[i][j] > 0) || (i < fq2s_stat.gs.read_max_length && fq2s_stat.qs.position_qual[i][j] > 0))
+ 				{
+ 					max_qual = max_qual > j ? max_qual : j;
+ 				}
+ 			}
+ 		}
+-		for (uint64_t i = 0; i != gv.trim1_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < max(fq1s_stat.gs.read_max_length, fq2s_stat.gs.read_max_length); i++)
+ 		{
+ 			for (uint64_t j = 0; j <= max_qual; j++)
+ 			{
+-				gv.trim1_stat.qs.position_qual[i][j] += fq1s_stat.qs.position_qual[i][j];
+-				gv.trim2_stat.qs.position_qual[i][j] += fq2s_stat.qs.position_qual[i][j];
++				if (i < fq1s_stat.gs.read_max_length)
++					gv.trim1_stat.qs.position_qual[i][j] += fq1s_stat.qs.position_qual[i][j];
++				if (i < fq2s_stat.gs.read_max_length)
++					gv.trim2_stat.qs.position_qual[i][j] += fq2s_stat.qs.position_qual[i][j];
+ 			}
+ 		}
+ 	}
+@@ -965,9 +1041,9 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 		{
+ 			gv.clean1_stat.gs.read_length = gv.clean1_stat.gs.base_number / gv.clean1_stat.gs.reads_number;
+ 		}
+-		if (gv.clean1_stat.gs.read_max_length < fq1s_stat.gs.read_length)
++		if (gv.clean1_stat.gs.read_max_length < fq1s_stat.gs.read_max_length)
+ 		{
+-			gv.clean1_stat.gs.read_max_length = fq1s_stat.gs.read_length;
++			gv.clean1_stat.gs.read_max_length = fq1s_stat.gs.read_max_length;
+ 		}
+ 		gv.clean1_stat.gs.a_number += fq1s_stat.gs.a_number;
+ 		gv.clean1_stat.gs.c_number += fq1s_stat.gs.c_number;
+@@ -989,9 +1065,9 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 		{
+ 			gv.clean2_stat.gs.read_length = gv.clean2_stat.gs.base_number / gv.clean2_stat.gs.reads_number;
+ 		}
+-		if (gv.clean2_stat.gs.read_max_length < gv.clean2_stat.gs.read_length)
++		if (gv.clean2_stat.gs.read_max_length < fq2s_stat.gs.read_max_length)
+ 		{
+-			gv.clean2_stat.gs.read_max_length = gv.clean2_stat.gs.read_length;
++			gv.clean2_stat.gs.read_max_length = fq2s_stat.gs.read_max_length;
+ 		}
+ 		gv.clean2_stat.gs.a_number += fq2s_stat.gs.a_number;
+ 		gv.clean2_stat.gs.c_number += fq2s_stat.gs.c_number;
+@@ -1002,21 +1078,23 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 		gv.clean2_stat.gs.q30_num += fq2s_stat.gs.q30_num;
+ 		string base_set = "ACGTN"; // base content and quality along read position stat
+ 		int max_qual1(0), max_qual2(0);
+-		for (uint64_t i = 0; i != gv.clean1_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (uint64_t j = 0; j != base_set.size(); j++)
+ 			{
+ 				gv.clean1_stat.bs.position_acgt_content[i][j] += fq1s_stat.bs.position_acgt_content[i][j];
+ 			}
+ 		}
+-		for (uint64_t i = 0; i != gv.clean2_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < fq2s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (uint64_t j = 0; j != base_set.size(); j++)
+ 			{
+ 				gv.clean2_stat.bs.position_acgt_content[i][j] += fq2s_stat.bs.position_acgt_content[i][j];
+ 			}
+ 		}
+-		for (uint64_t i = 0; i != gv.clean1_stat.gs.read_max_length; i++)
++		gv.clean1_stat.gs.trim_position_max = max(gv.clean1_stat.gs.trim_position_max, fq1s_stat.gs.trim_position_max);
++		gv.clean2_stat.gs.trim_position_max = max(gv.clean2_stat.gs.trim_position_max, fq2s_stat.gs.trim_position_max);
++		for (uint64_t i = 1; i <= fq1s_stat.gs.trim_position_max; i++)
+ 		{
+ 			gv.clean1_stat.ts.ht[i] += fq1s_stat.ts.ht[i];
+ 			gv.clean1_stat.ts.hlq[i] += fq1s_stat.ts.hlq[i];
+@@ -1024,7 +1102,7 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 			gv.clean1_stat.ts.tlq[i] += fq1s_stat.ts.tlq[i];
+ 			gv.clean1_stat.ts.ta[i] += fq1s_stat.ts.ta[i];
+ 		}
+-		for (uint64_t i = 0; i != gv.clean2_stat.gs.read_max_length; i++)
++		for (uint64_t i = 1; i <= fq2s_stat.gs.trim_position_max; i++)
+ 		{
+ 			gv.clean2_stat.ts.ht[i] += fq2s_stat.ts.ht[i];
+ 			gv.clean2_stat.ts.hlq[i] += fq2s_stat.ts.hlq[i];
+@@ -1032,7 +1110,7 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 			gv.clean2_stat.ts.tlq[i] += fq2s_stat.ts.tlq[i];
+ 			gv.clean2_stat.ts.ta[i] += fq2s_stat.ts.ta[i];
+ 		}
+-		for (uint64_t i = 0; i != gv.clean1_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (uint64_t j = 1; j <= gp.maxBaseQuality; j++)
+ 			{
+@@ -1042,14 +1120,14 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 				}
+ 			}
+ 		}
+-		for (uint64_t i = 0; i != gv.clean1_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (uint64_t j = 0; j <= max_qual1; j++)
+ 			{
+ 				gv.clean1_stat.qs.position_qual[i][j] += fq1s_stat.qs.position_qual[i][j];
+ 			}
+ 		}
+-		for (uint64_t i = 0; i != gv.clean2_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < fq2s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (uint64_t j = 1; j <= gp.maxBaseQuality; j++)
+ 			{
+@@ -1059,7 +1137,7 @@ void peProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_fastq_file_stat &fq2
+ 				}
+ 			}
+ 		}
+-		for (uint64_t i = 0; i != gv.clean2_stat.gs.read_max_length; i++)
++		for (uint64_t i = 0; i < fq2s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (uint64_t j = 0; j <= max_qual2; j++)
+ 			{
+@@ -1200,6 +1278,9 @@ void *peProcess::stat_pe_fqs(PEstatOption opt, string dataType)
+ 				opt.stat1->gs.q30_num++;
+ 		}
+ 		opt.stat1->gs.read_length = (*ix).sequence.size();
++		opt.stat1->gs.read_max_length = max(opt.stat1->gs.read_max_length, opt.stat1->gs.read_length);
++		opt.stat1->gs.trim_position_max = max(opt.stat1->gs.trim_position_max,
++			max(opt.stat1->gs.read_length, (*ix).raw_length > 0 ? static_cast<uint64_t>((*ix).raw_length) : uint64_t(0)));
+ 		opt.stat1->gs.base_number += opt.stat1->gs.read_length;
+ 	}
+ 	// check base quality setting whether ok
+@@ -1417,6 +1498,9 @@ void *peProcess::stat_pe_fqs(PEstatOption opt, string dataType)
+ 				opt.stat2->gs.q30_num++;
+ 		}
+ 		opt.stat2->gs.read_length = (*ix).sequence.size();
++		opt.stat2->gs.read_max_length = max(opt.stat2->gs.read_max_length, opt.stat2->gs.read_length);
++		opt.stat2->gs.trim_position_max = max(opt.stat2->gs.trim_position_max,
++			max(opt.stat2->gs.read_length, (*ix).raw_length > 0 ? static_cast<uint64_t>((*ix).raw_length) : uint64_t(0)));
+ 		opt.stat2->gs.base_number += opt.stat2->gs.read_length;
+ 	}
+ 	return &bq_check;
+@@ -1474,6 +1558,11 @@ void peProcess::filter_pe_fqs(PEcalOption *opt)
+ 				opt->clean_result2->emplace_back(pe_fastq_filter.fq2);
+ 			}
+ 		}
++		else
++		{
++			opt->local_fs->filtered_bases1 += (*i).sequence.size();
++			opt->local_fs->filtered_bases2 += (*i2).sequence.size();
++		}
+ 		i2++;
+ 		if (i2 == opt->fq2s->end())
+ 		{
+@@ -1604,6 +1693,11 @@ void peProcess::filter_pe_fqs(PEcalOption *opt, int index)
+ 				opt->clean_result2->emplace_back(pe_fastq_filter.fq2);
+ 			}
+ 		}
++		else
++		{
++			opt->local_fs->filtered_bases1 += (*i).sequence.size();
++			opt->local_fs->filtered_bases2 += (*i2).sequence.size();
++		}
+ 		i2++;
+ 		if (i2 == opt->fq2s->end())
+ 		{
+@@ -3515,7 +3609,7 @@ void peProcess::peStreaming_stat(C_global_variable &local_gv)
+ 	cout << "#Base_distributions_by_read_position"
+ 		 << "\n";
+ 	// uint64_t position_acgt_content[READ_MAX_LEN][5];
+-	for (uint64_t i = 0; i != local_gv.raw1_stat.gs.read_length; i++)
++	for (uint64_t i = 0; i != local_gv.raw1_stat.gs.read_max_length; i++)
+ 	{
+ 		for (uint64_t j = 0; j != 4; j++)
+ 		{
+@@ -3523,7 +3617,7 @@ void peProcess::peStreaming_stat(C_global_variable &local_gv)
+ 		}
+ 		cout << local_gv.raw1_stat.bs.position_acgt_content[i][4] << "\n";
+ 	}
+-	for (uint64_t i = 0; i != local_gv.clean1_stat.gs.read_length; i++)
++	for (uint64_t i = 0; i != local_gv.clean1_stat.gs.read_max_length; i++)
+ 	{
+ 		for (uint64_t j = 0; j != 4; j++)
+ 		{
+@@ -3534,7 +3628,7 @@ void peProcess::peStreaming_stat(C_global_variable &local_gv)
+ 	cout << "#Raw_Base_quality_value_distribution_by_read_position"
+ 		 << "\n";
+ 	// position_qual[READ_MAX_LEN][gp.maxBaseQuality]
+-	for (uint64_t i = 0; i != local_gv.raw1_stat.gs.read_length; i++)
++	for (uint64_t i = 0; i != local_gv.raw1_stat.gs.read_max_length; i++)
+ 	{
+ 		for (uint64_t j = 0; j != 40; j++)
+ 		{
+@@ -3542,7 +3636,7 @@ void peProcess::peStreaming_stat(C_global_variable &local_gv)
+ 		}
+ 		cout << "0\n";
+ 	}
+-	for (uint64_t i = 0; i != local_gv.clean1_stat.gs.read_length; i++)
++	for (uint64_t i = 0; i != local_gv.clean1_stat.gs.read_max_length; i++)
+ 	{
+ 		for (uint64_t j = 0; j != 40; j++)
+ 		{
+@@ -3556,7 +3650,7 @@ void peProcess::peStreaming_stat(C_global_variable &local_gv)
+ 	cout << "#Base_distributions_by_read_position"
+ 		 << "\n";
+ 	// uint64_t position_acgt_content[READ_MAX_LEN][5];
+-	for (uint64_t i = 0; i != local_gv.raw2_stat.gs.read_length; i++)
++	for (uint64_t i = 0; i != local_gv.raw2_stat.gs.read_max_length; i++)
+ 	{
+ 		for (uint64_t j = 0; j != 4; j++)
+ 		{
+@@ -3564,7 +3658,7 @@ void peProcess::peStreaming_stat(C_global_variable &local_gv)
+ 		}
+ 		cout << local_gv.raw2_stat.bs.position_acgt_content[i][4] << "\n";
+ 	}
+-	for (uint64_t i = 0; i != local_gv.clean2_stat.gs.read_length; i++)
++	for (uint64_t i = 0; i != local_gv.clean2_stat.gs.read_max_length; i++)
+ 	{
+ 		for (uint64_t j = 0; j != 4; j++)
+ 		{
+@@ -3575,7 +3669,7 @@ void peProcess::peStreaming_stat(C_global_variable &local_gv)
+ 	cout << "#Raw_Base_quality_value_distribution_by_read_position"
+ 		 << "\n";
+ 	// position_qual[READ_MAX_LEN][gp.maxBaseQuality]
+-	for (uint64_t i = 0; i != local_gv.raw2_stat.gs.read_length; i++)
++	for (uint64_t i = 0; i != local_gv.raw2_stat.gs.read_max_length; i++)
+ 	{
+ 		for (uint64_t j = 0; j != 41; j++)
+ 		{
+@@ -3583,7 +3677,7 @@ void peProcess::peStreaming_stat(C_global_variable &local_gv)
+ 		}
+ 		cout << "0\n";
+ 	}
+-	for (uint64_t i = 0; i != local_gv.clean2_stat.gs.read_length; i++)
++	for (uint64_t i = 0; i != local_gv.clean2_stat.gs.read_max_length; i++)
+ 	{
+ 		for (uint64_t j = 0; j != 41; j++)
+ 		{
+diff --git a/src/process_argv.cpp b/src/process_argv.cpp
+index 1403d3e..57a7938 100644
+--- a/src/process_argv.cpp
++++ b/src/process_argv.cpp
+@@ -920,7 +920,7 @@ void printModule()
+ {
+ 	cout << endl;
+ 	cout << "Program: SOAPnuke\n";
+-	cout << "Version: " << PACKAGEVERSION << "." << MINORVERSION << endl;
++	cout << "Version: " << PACKAGEVERSION << "." << MINORVERSION << VERSION_SUFFIX << endl;
+ 	cout << "Contact: GongChun<gongchun@genomics.cn>  ChenYuXin<chenyuxin@genomics.cn>" << endl;
+ 	cout << "Command:\n";
+ 	cout << "         filter        preprocessing normal Fastq files\n";
+@@ -1151,7 +1151,7 @@ void printUsage(string c_module)
+ 
+ void printVersion()
+ {
+-	cerr << "SOAPnuke filter tools version " << PACKAGEVERSION << "." << MINORVERSION << "\n";
++	cerr << "SOAPnuke filter tools version " << PACKAGEVERSION << "." << MINORVERSION << VERSION_SUFFIX << "\n";
+ 	exit(1);
+ }
+ 
+diff --git a/src/process_argv.h b/src/process_argv.h
+index c3ad0cb..897ccc2 100644
+--- a/src/process_argv.h
++++ b/src/process_argv.h
+@@ -14,6 +14,9 @@ using namespace ::std;
+ #ifndef MINORVERSION
+ #define MINORVERSION "9"
+ #endif
++#ifndef VERSION_SUFFIX
++#define VERSION_SUFFIX "+percentile-fix+qc-length-fix"
++#endif
+ void check_module(int argc, char *argv[]);
+ int global_parameter_initial(int argc, char *argv[], C_global_parameter &gp);
+ bool check_parameter(int argc, char *argv[], C_global_parameter &gp);
+diff --git a/src/seprocess.cpp b/src/seprocess.cpp
+index 8df83fd..bdb00cc 100644
+--- a/src/seprocess.cpp
++++ b/src/seprocess.cpp
+@@ -185,6 +185,11 @@ void seProcess::print_stat()
+ 	char filter_r1_ratio[100];
+ 	char raw_r1[7][100];
+ 	char clean_r1[7][100];
++	for (int i = 0; i < 7; i++)
++	{
++		sprintf(raw_r1[i], "0.00");
++		sprintf(clean_r1[i], "0.00");
++	}
+ 	if (gv.raw1_stat.gs.reads_number != 0)
+ 	{
+ 		raw1_rl = (float)gv.raw1_stat.gs.base_number / gv.raw1_stat.gs.reads_number;
+@@ -212,10 +217,10 @@ void seProcess::print_stat()
+ 	of_general_stat << "Total number of reads\t" << setprecision(15) << gv.raw1_stat.gs.reads_number << " (100.00%)\t"
+ 					<< gv.clean1_stat.gs.reads_number << " (100.00%)" << endl;
+ 	of_general_stat << "Number of filtered reads\t" << total_filter_fq1_num << " (" << filter_r1_ratio << "%)\t-" << endl;
+-	uint64_t filter_base1 = total_filter_fq1_num * gv.raw1_stat.gs.read_length;
++	uint64_t filter_base1 = gv.fs.filtered_bases1;
+ 	of_general_stat << "Total number of bases\t" << setprecision(15) << gv.raw1_stat.gs.base_number << " (100.00%)\t"
+ 					<< gv.clean1_stat.gs.base_number << " (100.00%)" << endl;
+-	of_general_stat << "Number of filtered bases\t" << setprecision(15) << filter_base1 << " (" << filter_r1_ratio << "%)\t-" << endl;
++	of_general_stat << "Number of filtered bases\t" << setprecision(15) << filter_base1 << " (" << setiosflags(ios::fixed) << setprecision(2) << (gv.raw1_stat.gs.base_number ? 100.0 * filter_base1 / gv.raw1_stat.gs.base_number : 0.0) << "%)\t-" << endl;
+ 	of_general_stat << "Number of base A\t" << setprecision(15) << gv.raw1_stat.gs.a_number << " (" << raw_r1[0] << "%)\t"
+ 					<< gv.clean1_stat.gs.a_number << " (" << clean_r1[0] << "%)\t" << endl;
+ 	of_general_stat << "Number of base C\t" << setprecision(15) << gv.raw1_stat.gs.c_number << " (" << raw_r1[1] << "%)\t"
+@@ -235,7 +240,7 @@ void seProcess::print_stat()
+ 	of_general_stat.close();
+ 
+ 	of_readPos_base_stat1 << "Pos\tA\tC\tG\tT\tN\tclean A\tclean C\tclean G\tclean T\tclean N" << endl;
+-	for (int i = 0; i < gv.raw1_stat.gs.read_length; i++)
++	for (int i = 0; i < gv.raw1_stat.gs.read_max_length; i++)
+ 	{
+ 		of_readPos_base_stat1 << i + 1 << "\t";
+ 		string base_set = "ACGTN";
+@@ -270,7 +275,7 @@ void seProcess::print_stat()
+ 	of_readPos_qual_stat1 << "#raw fastq1 quality distribution" << endl;
+ 	of_readPos_qual_stat1 << "Pos\t";
+ 	int max_qual = 0;
+-	for (int i = 0; i < gv.raw1_stat.gs.read_length; i++)
++	for (int i = 0; i < gv.raw1_stat.gs.read_max_length; i++)
+ 	{
+ 		for (int j = 1; j <= gp.maxBaseQuality; j++)
+ 		{
+@@ -290,7 +295,7 @@ void seProcess::print_stat()
+ 	float *raw1_q30 = new float[gv.raw1_stat.gs.read_max_length];
+ 	float *clean1_q20 = new float[gv.raw1_stat.gs.read_max_length];
+ 	float *clean1_q30 = new float[gv.raw1_stat.gs.read_max_length];
+-	for (int i = 0; i != gv.raw1_stat.gs.read_length; i++)
++	for (int i = 0; i != gv.raw1_stat.gs.read_max_length; i++)
+ 	{
+ 		of_readPos_qual_stat1 << i + 1 << "\t";
+ 		uint64_t raw1_q20_num(0), raw1_q30_num(0), raw1_total(0);
+@@ -364,7 +369,7 @@ void seProcess::print_stat()
+ 		<< endl;
+ 	long long head_total1(0), tail_total1(0);
+ 	long long head_total_clean1(0), tail_total_clean1(0);
+-	for (int i = 0; i < gv.raw1_stat.gs.read_length; i++)
++	for (int i = 1; i <= gv.raw1_stat.gs.trim_position_max; i++)
+ 	{
+ 		head_total1 += gv.raw1_stat.ts.ht[i] + gv.raw1_stat.ts.hlq[i];
+ 		tail_total1 += gv.raw1_stat.ts.ta[i] + gv.raw1_stat.ts.tlq[i] + gv.raw1_stat.ts.tt[i];
+@@ -372,7 +377,7 @@ void seProcess::print_stat()
+ 		tail_total_clean1 += gv.clean1_stat.ts.ta[i] + gv.clean1_stat.ts.tlq[i] + gv.clean1_stat.ts.tt[i];
+ 		// of_trim_stat1<<i+1<<"\t"<<gv.trim1_stat.ts.hlq[i]<<"\t"<<gv.trim1_stat.ts.ht[i]<<"\t"<<gv.trim1_stat.ts.ta[i]
+ 	}
+-	for (int i = 1; i <= gv.raw1_stat.gs.read_length; i++)
++	for (int i = 1; i <= gv.raw1_stat.gs.trim_position_max; i++)
+ 	{
+ 		of_trim_stat1 << i << "\t";
+ 		if (head_total1 > 0)
+@@ -439,9 +444,9 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 	{
+ 		if (gv.raw1_stat.gs.read_length == 0)
+ 			gv.raw1_stat.gs.read_length = fq1s_stat.gs.read_length; // generate stat
+-		if (gv.raw1_stat.gs.read_max_length < fq1s_stat.gs.read_length)
++		if (gv.raw1_stat.gs.read_max_length < fq1s_stat.gs.read_max_length)
+ 		{
+-			gv.raw1_stat.gs.read_max_length = fq1s_stat.gs.read_length;
++			gv.raw1_stat.gs.read_max_length = fq1s_stat.gs.read_max_length;
+ 		}
+ 		gv.raw1_stat.gs.reads_number += fq1s_stat.gs.reads_number;
+ 		gv.raw1_stat.gs.base_number += fq1s_stat.gs.base_number;
+@@ -454,14 +459,15 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 		gv.raw1_stat.gs.q30_num += fq1s_stat.gs.q30_num;
+ 		string base_set = "ACGTN"; // base content and quality along read position stat
+ 		int max_qual = 0;
+-		for (int i = 0; i != gv.raw1_stat.gs.read_max_length; i++)
++		for (int i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (int j = 0; j != base_set.size(); j++)
+ 			{
+ 				gv.raw1_stat.bs.position_acgt_content[i][j] += fq1s_stat.bs.position_acgt_content[i][j];
+ 			}
+ 		}
+-		for (int i = 1; i <= gv.raw1_stat.gs.read_max_length; i++)
++		gv.raw1_stat.gs.trim_position_max = max(gv.raw1_stat.gs.trim_position_max, fq1s_stat.gs.trim_position_max);
++		for (int i = 1; i <= fq1s_stat.gs.trim_position_max; i++)
+ 		{
+ 			gv.raw1_stat.ts.ht[i] += fq1s_stat.ts.ht[i];
+ 			gv.raw1_stat.ts.hlq[i] += fq1s_stat.ts.hlq[i];
+@@ -469,7 +475,7 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 			gv.raw1_stat.ts.tlq[i] += fq1s_stat.ts.tlq[i];
+ 			gv.raw1_stat.ts.ta[i] += fq1s_stat.ts.ta[i];
+ 		}
+-		for (int i = 0; i != gv.raw1_stat.gs.read_max_length; i++)
++		for (int i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (int j = 1; j <= gp.maxBaseQuality; j++)
+ 			{
+@@ -478,7 +484,7 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 			}
+ 		}
+ 
+-		for (int i = 0; i != gv.raw1_stat.gs.read_max_length; i++)
++		for (int i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (int j = 0; j <= max_qual; j++)
+ 			{
+@@ -499,6 +505,7 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 		gv.fs.long_len_num += fs_stat.long_len_num;
+ 		gv.fs.include_contam_seq_num += fs_stat.include_contam_seq_num;
+ 		gv.fs.include_global_contam_seq_num += fs_stat.include_global_contam_seq_num;
++		gv.fs.filtered_bases1 += fs_stat.filtered_bases1;
+ 		if (gp.rmdup)
+ 		{
+ 			gv.fs.dupReadsNum += fs_stat.dupReadsNum;
+@@ -517,9 +524,9 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 		{
+ 			gv.trim1_stat.gs.read_length = gv.trim1_stat.gs.base_number / gv.trim1_stat.gs.reads_number;
+ 		}
+-		if (gv.trim1_stat.gs.read_max_length < fq1s_stat.gs.read_length)
++		if (gv.trim1_stat.gs.read_max_length < fq1s_stat.gs.read_max_length)
+ 		{
+-			gv.trim1_stat.gs.read_max_length = fq1s_stat.gs.read_length;
++			gv.trim1_stat.gs.read_max_length = fq1s_stat.gs.read_max_length;
+ 		}
+ 		gv.trim1_stat.gs.a_number += fq1s_stat.gs.a_number;
+ 		gv.trim1_stat.gs.c_number += fq1s_stat.gs.c_number;
+@@ -531,14 +538,15 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 
+ 		int max_qual(0);
+ 		string base_set = "ACGTN"; // base content and quality along read position stat
+-		for (int i = 0; i != gv.trim1_stat.gs.read_max_length; i++)
++		for (int i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (int j = 0; j != base_set.size(); j++)
+ 			{
+ 				gv.trim1_stat.bs.position_acgt_content[i][j] += fq1s_stat.bs.position_acgt_content[i][j];
+ 			}
+ 		}
+-		for (int i = 0; i != gv.trim1_stat.gs.read_max_length; i++)
++		gv.trim1_stat.gs.trim_position_max = max(gv.trim1_stat.gs.trim_position_max, fq1s_stat.gs.trim_position_max);
++		for (int i = 1; i <= fq1s_stat.gs.trim_position_max; i++)
+ 		{
+ 			gv.trim1_stat.ts.ht[i] += fq1s_stat.ts.ht[i];
+ 			gv.trim1_stat.ts.hlq[i] += fq1s_stat.ts.hlq[i];
+@@ -546,7 +554,7 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 			gv.trim1_stat.ts.tlq[i] += fq1s_stat.ts.tlq[i];
+ 			gv.trim1_stat.ts.ta[i] += fq1s_stat.ts.ta[i];
+ 		}
+-		for (int i = 0; i != gv.trim1_stat.gs.read_max_length; i++)
++		for (int i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (int j = 1; j <= gp.maxBaseQuality; j++)
+ 			{
+@@ -554,7 +562,7 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 					max_qual = max_qual > j ? max_qual : j;
+ 			}
+ 		}
+-		for (int i = 0; i != gv.trim1_stat.gs.read_max_length; i++)
++		for (int i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (int j = 0; j <= max_qual; j++)
+ 			{
+@@ -577,9 +585,9 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 		{
+ 			gv.clean1_stat.gs.read_length = gv.clean1_stat.gs.base_number / gv.clean1_stat.gs.reads_number;
+ 		}
+-		if (gv.clean1_stat.gs.read_max_length < fq1s_stat.gs.read_length)
++		if (gv.clean1_stat.gs.read_max_length < fq1s_stat.gs.read_max_length)
+ 		{
+-			gv.clean1_stat.gs.read_max_length = fq1s_stat.gs.read_length;
++			gv.clean1_stat.gs.read_max_length = fq1s_stat.gs.read_max_length;
+ 		}
+ 		gv.clean1_stat.gs.a_number += fq1s_stat.gs.a_number;
+ 		gv.clean1_stat.gs.c_number += fq1s_stat.gs.c_number;
+@@ -591,14 +599,15 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 
+ 		string base_set = "ACGTN"; // base content and quality along read position stat
+ 		int max_qual(0);
+-		for (int i = 0; i != gv.clean1_stat.gs.read_max_length; i++)
++		for (int i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (int j = 0; j != base_set.size(); j++)
+ 			{
+ 				gv.clean1_stat.bs.position_acgt_content[i][j] += fq1s_stat.bs.position_acgt_content[i][j];
+ 			}
+ 		}
+-		for (int i = 0; i != gv.clean1_stat.gs.read_max_length; i++)
++		gv.clean1_stat.gs.trim_position_max = max(gv.clean1_stat.gs.trim_position_max, fq1s_stat.gs.trim_position_max);
++		for (int i = 1; i <= fq1s_stat.gs.trim_position_max; i++)
+ 		{
+ 			gv.clean1_stat.ts.ht[i] += fq1s_stat.ts.ht[i];
+ 			gv.clean1_stat.ts.hlq[i] += fq1s_stat.ts.hlq[i];
+@@ -606,7 +615,7 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 			gv.clean1_stat.ts.tlq[i] += fq1s_stat.ts.tlq[i];
+ 			gv.clean1_stat.ts.ta[i] += fq1s_stat.ts.ta[i];
+ 		}
+-		for (int i = 0; i != gv.clean1_stat.gs.read_max_length; i++)
++		for (int i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (int j = 1; j <= gp.maxBaseQuality; j++)
+ 			{
+@@ -614,7 +623,7 @@ void seProcess::update_stat(C_fastq_file_stat &fq1s_stat, C_filter_stat &fs_stat
+ 					max_qual = max_qual > j ? max_qual : j;
+ 			}
+ 		}
+-		for (int i = 0; i != gv.clean1_stat.gs.read_max_length; i++)
++		for (int i = 0; i < fq1s_stat.gs.read_max_length; i++)
+ 		{
+ 			for (int j = 0; j <= max_qual; j++)
+ 			{
+@@ -736,6 +745,9 @@ void *seProcess::stat_se_fqs(SEstatOption opt, string dataType)
+ 				opt.stat1->gs.q30_num++;
+ 		}
+ 		opt.stat1->gs.read_length = (*ix).sequence.size();
++		opt.stat1->gs.read_max_length = max(opt.stat1->gs.read_max_length, opt.stat1->gs.read_length);
++		opt.stat1->gs.trim_position_max = max(opt.stat1->gs.trim_position_max,
++			max(opt.stat1->gs.read_length, (*ix).raw_length > 0 ? static_cast<uint64_t>((*ix).raw_length) : uint64_t(0)));
+ 		opt.stat1->gs.base_number += opt.stat1->gs.read_length;
+ 	}
+ 	int q1_exceed(0), q1_normal_bq(0), q1_mean_bq(0);
+@@ -912,6 +924,10 @@ void seProcess::filter_se_fqs(SEcalOption opt)
+ 				opt.clean_result1->emplace_back(se_fastq_filter.read);
+ 			}
+ 		}
++		else
++		{
++			opt.se_local_fs->filtered_bases1 += (*i).sequence.size();
++		}
+ 	}
+ 	// return cut_pos;
+ }
+@@ -2424,7 +2440,7 @@ void seProcess::seStreaming_stat(C_global_variable &local_gv)
+ 	cout << "#Base_distributions_by_read_position"
+ 		 << "\n";
+ 	// uint64_t position_acgt_content[READ_MAX_LEN][5];
+-	for (int i = 0; i != local_gv.raw1_stat.gs.read_length; i++)
++	for (int i = 0; i != local_gv.raw1_stat.gs.read_max_length; i++)
+ 	{
+ 		for (int j = 0; j != 4; j++)
+ 		{
+@@ -2432,7 +2448,7 @@ void seProcess::seStreaming_stat(C_global_variable &local_gv)
+ 		}
+ 		cout << local_gv.raw1_stat.bs.position_acgt_content[i][4] << "\n";
+ 	}
+-	for (int i = 0; i != local_gv.clean1_stat.gs.read_length; i++)
++	for (int i = 0; i != local_gv.clean1_stat.gs.read_max_length; i++)
+ 	{
+ 		for (int j = 0; j != 4; j++)
+ 		{
+@@ -2443,7 +2459,7 @@ void seProcess::seStreaming_stat(C_global_variable &local_gv)
+ 	cout << "#Raw_Base_quality_value_distribution_by_read_position"
+ 		 << "\n";
+ 	// position_qual[READ_MAX_LEN][gp.maxBaseQuality]
+-	for (int i = 0; i != local_gv.raw1_stat.gs.read_length; i++)
++	for (int i = 0; i != local_gv.raw1_stat.gs.read_max_length; i++)
+ 	{
+ 		for (int j = 0; j != 40; j++)
+ 		{
+@@ -2451,7 +2467,7 @@ void seProcess::seStreaming_stat(C_global_variable &local_gv)
+ 		}
+ 		cout << "0\n";
+ 	}
+-	for (int i = 0; i != local_gv.clean1_stat.gs.read_length; i++)
++	for (int i = 0; i != local_gv.clean1_stat.gs.read_max_length; i++)
+ 	{
+ 		for (int j = 0; j != 40; j++)
+ 		{
+@@ -2738,7 +2754,11 @@ void seProcess::filter_se_fqs(
+ 				opt.clean_result1->emplace_back(se_fastq_filter.read);
+ 			}
+ 		}
++		else
++		{
++			opt.se_local_fs->filtered_bases1 += (*i).sequence.size();
++		}
+ 	}
+ 	delete[] dupFilter;
+ 	// return cut_pos;
+-}
+\ No newline at end of file
++}
