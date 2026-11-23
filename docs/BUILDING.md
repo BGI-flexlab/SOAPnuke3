@@ -1,35 +1,25 @@
 # Installation, builds and portable tests
 
-## Linux ARM64 source build
-
-Build natively on the ARM64 server. `uname -m` should print `aarch64` (also called ARM64); an x86-64 executable cannot run natively there. Linux ARM64 support does not imply macOS or 32-bit ARM support.
-
-The 3.0.0 source passed `make test` on a [native Ubuntu 24.04 ARM64 runner](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41795521134), including the slow test, command-line checks and owned-library examples. The [ARM64 download](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/SOAPnuke-3.0.0-linux-aarch64.tar.gz) comes from that successful build. It requires glibc 2.39+, `GLIBCXX_3.4.30`, `CXXABI_1.3.13`, and zlib; compile natively on an older system instead. This establishes functional build support, not ARM performance or scaling claims.
-
-On Ubuntu 24.04 ARM64, install the system build tools:
-
-```sh
-sudo apt-get update
-sudo apt-get install build-essential cmake zlib1g-dev python3 curl git
-```
-
-Install [Rust with rustup](https://rust-lang.org/tools/install/) if it is not already available, then select the tested toolchain for these commands:
-
-```sh
-rustup toolchain install 1.99.1 --profile minimal
-git clone --depth 1 https://github.com/BGI-flexlab/SOAPnuke3.git
-cd SOAPnuke3
-rustup run 1.99.1 make JOBS=2
-rustup run 1.99.1 make test JOBS=2 TEST_THREADS=2
-./target/release/SOAPnuke --version
-export PATH="$PWD/target/release:$PATH"
-```
-
-The same commands build natively on Linux x86-64. `JOBS` controls build concurrency, not the runtime `--threads` option. Cargo uses the vendored dependencies without downloading crates. The system tools and Rust installation need network access unless already installed. Use a fresh source directory for each architecture; cross-compilation is not the documented route. The maintained checkout includes a synchronization-only unit-test fix also applied by the Conda recipe; processing behavior is unchanged. The original 3.0.0 tag and source archive are preserved.
-
 ## Install with Conda
 
-The Linux x86-64 and ARM64 Conda packages passed [native build, functional and fresh-installation tests](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41802552250). The [Bioconda recipe submission](https://github.com/bioconda/bioconda-recipes/pull/71175) is awaiting review; `conda install -c bioconda soapnuke3` is **not available yet**. Until channel publication, use the tested package from the GitHub release.
+Bioconda publishes SOAPnuke 3.0.0 for Linux x86-64 (`linux-64`) and ARM64 (`linux-aarch64`). Run these commands on the machine where you will process reads. Conda selects the matching build and installs its runtime libraries. [Published packages](https://anaconda.org/bioconda/soapnuke3/files)
+
+```sh
+conda create -n soapnuke3 --override-channels --strict-channel-priority -c conda-forge -c bioconda soapnuke3=3.0.0
+conda activate soapnuke3
+SOAPnuke --version
+```
+
+The package name is lowercase `soapnuke3`. The executable is `SOAPnuke`, and the first line of its version output is `SOAPnuke 3.0.0`. Run `SOAPnuke process --help` to see the FASTQ processing options.
+
+If your Conda configuration redirects channel names to a mirror that cannot supply the package, use the official channel URLs in the create command:
+
+```sh
+conda create -n soapnuke3 --override-channels --strict-channel-priority \
+  -c https://conda.anaconda.org/conda-forge -c https://conda.anaconda.org/bioconda soapnuke3=3.0.0
+```
+
+### Install a Conda file from the GitHub release
 
 Download the package for the machine where it will run:
 
@@ -62,9 +52,36 @@ conda install --offline ./soapnuke3-3.0.0-h5912ae5_1.conda
 
 Verify the installation with `SOAPnuke --version` and `SOAPnuke process --help`. Neither Rust nor a C/C++ compiler is needed to use these packages.
 
+## Linux ARM64 source build
+
+Build natively on the ARM64 server. `uname -m` should print `aarch64` (also called ARM64); an x86-64 executable cannot run natively there. Linux ARM64 support does not imply macOS or 32-bit ARM support.
+
+The 3.0.0 source passed `make test` on a [native Ubuntu 24.04 ARM64 runner](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41795521134), including the slow test, command-line checks and owned-library examples. The [ARM64 download](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/SOAPnuke-3.0.0-linux-aarch64.tar.gz) comes from that successful build. It requires glibc 2.39+, `GLIBCXX_3.4.30`, `CXXABI_1.3.13`, and zlib; compile natively on an older system instead. This establishes functional build support, not ARM performance or scaling claims.
+
+On Ubuntu 24.04 ARM64, install the system build tools:
+
+```sh
+sudo apt-get update
+sudo apt-get install build-essential cmake zlib1g-dev python3 curl git
+```
+
+Install [Rust with rustup](https://rust-lang.org/tools/install/) if it is not already available, then select the tested toolchain for these commands:
+
+```sh
+rustup toolchain install 1.99.1 --profile minimal
+git clone --depth 1 https://github.com/BGI-flexlab/SOAPnuke3.git
+cd SOAPnuke3
+rustup run 1.99.1 make JOBS=2
+rustup run 1.99.1 make test JOBS=2 TEST_THREADS=2
+./target/release/SOAPnuke --version
+export PATH="$PWD/target/release:$PATH"
+```
+
+The same commands build natively on Linux x86-64. `JOBS` controls build concurrency, not the runtime `--threads` option. Cargo uses the vendored dependencies without downloading crates. The system tools and Rust installation need network access unless already installed. Use a fresh source directory for each architecture; cross-compilation is not the documented route. The maintained checkout includes a synchronization-only unit-test fix also applied by the Conda recipe; processing behavior is unchanged. The original 3.0.0 tag and source archive are preserved.
+
 ## Conda package builds
 
-The recipe in [`packaging/conda`](../packaging/conda/) builds the immutable 3.0.0 source archive with Conda's Rust/C/C++ compilers and zlib. It applies a test-only synchronization patch so the CPU-permit contention test does not depend on thread scheduling; processing code and assertions are unchanged. The GitHub packages use Conda build number 1. The first Bioconda submission uses build number 0 as required for a new channel package, with the same source and test patch. The package name is `soapnuke3`; the installed command remains `SOAPnuke`.
+The recipe in [`packaging/conda`](../packaging/conda/) builds the immutable 3.0.0 source archive with Conda's Rust/C/C++ compilers and zlib. It applies a test-only synchronization patch so the CPU-permit contention test does not depend on thread scheduling; processing code and assertions are unchanged. The GitHub packages use Conda build number 1. Bioconda publishes 3.0.0 as build 0, using the same source and test patch. The package name is `soapnuke3`; the installed command remains `SOAPnuke`.
 
 To build a package on either a Linux x86-64 or ARM64 machine, use a current checkout containing the recipe:
 
@@ -81,7 +98,7 @@ conda activate soapnuke3
 SOAPnuke --version
 ```
 
-The recipe runs native unit tests and the Process, module and adapter-overlap test cases before packaging. Conda then installs the package into a separate test environment and checks the commands and an actual filtering result. A completed local build does not mean the package is already on Bioconda: [Bioconda publication requires review and a successful channel build](https://bioconda.github.io/contributor/workflow.html).
+The recipe runs native unit tests and the Process, module and adapter-overlap test cases before packaging. Conda then installs the package into a separate test environment and checks the commands and an actual filtering result.
 
 ## Maintained test suite
 

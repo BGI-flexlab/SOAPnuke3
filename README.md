@@ -16,7 +16,17 @@ This repository is separate from [SOAPnuke v1/v2](https://github.com/BGI-flexlab
 
 ## Install or build
 
-Choose the download matching `uname -m`:
+On Linux x86-64 or ARM64, install the `soapnuke3` package from Bioconda:
+
+```sh
+conda create -n soapnuke3 --override-channels --strict-channel-priority -c conda-forge -c bioconda soapnuke3=3.0.0
+conda activate soapnuke3
+SOAPnuke --version
+```
+
+See the [published Bioconda builds](https://anaconda.org/bioconda/soapnuke3/files) and the [Conda installation guide](docs/BUILDING.md#install-with-conda).
+
+For a standalone executable, choose the download matching `uname -m`:
 
 | Linux machine | Download |
 |---|---|
@@ -34,8 +44,6 @@ export PATH="$PWD/target/release:$PATH"
 ```
 
 See [building and tests](docs/BUILDING.md). Build jobs and processing threads are separate settings. Portable or byte-identical binary rebuilds are not promised.
-
-**Conda packages are available for Linux x86-64 and ARM64:** follow the [installation instructions](docs/BUILDING.md#install-with-conda). The package is named `soapnuke3` and installs the command `SOAPnuke`. [Bioconda submission](https://github.com/bioconda/bioconda-recipes/pull/71175) is awaiting review; the package is not yet available from that channel. The same guide includes [building the Conda packages from source](docs/BUILDING.md#conda-package-builds).
 
 ## Quick start
 
