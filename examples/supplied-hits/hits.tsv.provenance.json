@@ -1,0 +1,15 @@
+{
+  "version": "processing-supplied-hits/1",
+  "population": "original-input",
+  "source_ordinal_origin": 0,
+  "layout": "PE",
+  "input_phred": 33,
+  "source_units": 2,
+  "inputs": [
+    {"mate": 1, "path": "R1.fq", "sha256": "7ea0f352fbe37ea7e6d7b8ba47ce234d2f3c05a766b11212252e1c2e0b65b732"},
+    {"mate": 2, "path": "R2.fq", "sha256": "bdcda30ce01ecb1c23134ae4dc407ba4bb9a2e8e06b2f0951572aeb1377a8e82"}
+  ],
+  "provider": {"name": "hand-labelled-example", "version": "1", "arguments": []},
+  "references": [],
+  "aggregation": "one boolean per original mate"
+}

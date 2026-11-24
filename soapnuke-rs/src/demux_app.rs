@@ -661,6 +661,12 @@ fn run_owned(plan: &Plan, provided:Option<Arc<crate::native_io::OwnedIo>>) -> (i
     }
     if code != 0 {
         eprintln!("demux error: {}", report["error"]);
+    } else if !api_mode && s.counts[0] > 0 && s.counts[1] == 0 {
+        let unit = if plan.mates == 1 { "reads" } else { "read pairs" };
+        eprintln!(
+            "demux warning: 0 of {} input {unit} assigned to a sample ({} unassigned, {} ambiguous). Check the sample barcodes and barcode source.",
+            s.counts[0], s.counts[3], s.counts[2],
+        );
     }
     if plan.spec.json_report.as_ref().is_some_and(|p|p.is_file()){let _=fs::remove_file(&staged);}
     if code == 0 {

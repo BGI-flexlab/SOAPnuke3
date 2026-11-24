@@ -535,7 +535,7 @@ impl ProcessSettings {
                     .as_bytes()
                     .iter()
                     .rev()
-                    .take_while(|&&b| b == b'A')
+                    .take_while(|&&b| matches!(b, b'A' | b'a'))
                     .count()
                     >= tail_min,
             )

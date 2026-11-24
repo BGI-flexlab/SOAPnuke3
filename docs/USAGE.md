@@ -141,11 +141,19 @@ calls and requires a matching `hits.tsv.provenance.json`. SOAPnuke does not
 launch an aligner or create those calls automatically. Native exact k-mer
 screening is not a general alignment or taxonomic classification method.
 
+The [paired-end supplied-hits example](../examples/supplied-hits/README.md)
+includes two FASTQs, the exact TSV and JSON, the command, and the expected clean
+mates. Use it as a template when converting decisions from another tool.
+
 ## Small-RNA profile
 
 `--profile srna` provides a single-end adapter-based flow. Supply an explicit
 3′ adapter with trimming enabled, and choose `--srna-min-insert` as needed.
-Optional controls reject 5′ adapter matches or poly-A runs.
+Optional controls reject 5′ adapter matches or poly-A runs. With
+`--srna-reject-poly-a`, SOAPnuke counts consecutive `A` or `a` bases at the
+3′ end of the original FASTQ record before adapter trimming. A run of
+`--tail-min` bases or longer rejects the read. A run in the insert followed by
+the adapter does not reach that raw end.
 
 This profile has its own processing order. It cannot be combined with ordinary
 fixed/quality/tail trimming, label capture, adapter inference or reference

@@ -18,6 +18,8 @@ SOAPnuke demux --r1 tests/fixtures/demux-inline-se/input.R1.fastq \
 
 This routes two of four units; one is ambiguous and one unassigned. Required sample destinations can be empty. Unused optional auxiliary files remain absent. PE, interleaved, multiple-lane and prefix modes keep their declared associations.
 
+Copy the [single-barcode TSV](../tests/fixtures/demux-inline-se/samples.tsv) to start a sample sheet. Keep the trailing tab on each sample row to represent an empty `barcode2`. If the job processes reads or pairs but assigns none, the CLI prints a warning with the unassigned and ambiguous counts. The JSON report records the completed routing result.
+
 ## Dedup
 
 Keys are the complete uppercase SE sequence or ordered PE sequence tuple. Headers, qualities, UMI and coordinates are not key fields. Full keys are compared; the earliest global input ordinal is representative. Representative and duplicate streams each preserve original order, case, headers and numeric Q. Prefix selection, filtering, transformations and sampling are not part of this job.
@@ -30,6 +32,10 @@ SOAPnuke dedup --r1 tests/fixtures/dedup-se/input.R1.fastq \
 ```
 
 There are six authored reads and three keys. Grouping uses bounded external storage; scratch space and file limits matter. Product-owned internal spills are cleaned; declared partial outputs remain truthful on failure. This is exact sequence equality, not molecular duplicate identification.
+
+Scratch and outputs can use separate filesystems. When they differ, SOAPnuke copies the finished FASTQ to a temporary file beside its destination before publishing it. The destination needs enough free space for the FASTQ. SOAPnuke refuses to overwrite an existing output. If cleanup fails, the diagnostic includes the affected path and any OS error, and the returned report distinguishes committed outputs from failed ones.
+
+To rerun the [cross-filesystem regression](../tests/check_dedup_cross_filesystem.py), pass `--binary`, `--spill-parent` and `--output-parent` to the script. The two parents must already exist on different writable filesystems. The script keeps its small test files in fresh subdirectories of both parents.
 
 ## Saved reports and exports
 

@@ -38,12 +38,26 @@ impl Read for CancelReader {
         self.reader.read(out)
     }
 }
-struct FileWriter(File);
+struct FileWriter(Option<File>);
 impl io::Write for FileWriter {
-    fn write(&mut self,b:&[u8])->io::Result<usize>{self.0.write(b)}
-    fn flush(&mut self)->io::Result<()>{self.0.flush()}
+    fn write(&mut self, bytes: &[u8]) -> io::Result<usize> {
+        self.0.as_mut().ok_or(io::ErrorKind::BrokenPipe)?.write(bytes)
+    }
+    fn flush(&mut self) -> io::Result<()> {
+        self.0.as_mut().ok_or(io::ErrorKind::BrokenPipe)?.flush()
+    }
 }
-impl ReportWriter for FileWriter {fn close(&mut self)->io::Result<()>{self.0.sync_all()}}
+impl ReportWriter for FileWriter {
+    fn close(&mut self) -> io::Result<()> {
+        if let Some(file) = self.0.take() {
+            let sync = file.sync_all();
+            let close = crate::checked_io::close_file(file).map_err(io::Error::other);
+            sync.and(close)
+        } else {
+            Ok(())
+        }
+    }
+}
 use std::io::Write;
 impl OwnedIo {
     pub fn new(spec:JobSpec, io:JobIo, cancel:CancellationToken, execution:std::sync::Arc<crate::native_execution::Execution>, stop:std::sync::Arc<std::sync::atomic::AtomicBool>, reservation:crate::native_execution::FeatureTicket)->Self{
@@ -71,7 +85,7 @@ impl OwnedIo {
                 let decl=self.spec.outputs.iter().find(|d|&d.channel==channel).ok_or_else(||io::Error::other("undeclared output"))?;
                 if matches!(decl.location,Location::Handle(_)){return Err(io::Error::other("missing output binding"));}
                 let f=std::fs::OpenOptions::new().write(true).create_new(true).open(stage.join(name))?;
-                outputs.insert(key.to_string(),Box::new(FileWriter(f)));
+                outputs.insert(key.to_string(),Box::new(FileWriter(Some(f))));
             }
         }
         Ok(())

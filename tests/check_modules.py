@@ -65,4 +65,40 @@ _,z=run('dedup-interleaved-conflict',['dedup','--r1',str(d/'r1.fq.gz'),'--r2',st
 assert b'out-interleaved excludes out1/out2' in z.stderr
 assert not (bad/'wrong.fq').exists() and not (bad/'interleaved.fq').exists()
 
+# Run the user-facing example itself; its two cmp checks verify the clean mates.
+example = repo / 'examples' / 'supplied-hits' / 'run.sh'
+result = out / 'supplied-hits-example'
+subprocess.run(['sh', str(example), str(result)], env={**env, 'SOAPNUKE': str(binary)},
+               check=True, timeout=30)
+report = json.loads((result / 'report.json').read_text())
+assert report['status'] == 'complete'
+contains(report['disposition'], {'input_units': 2, 'accepted_units': 1, 'rejected_units': 1,
+                                 'first_reasons': {'reference-action': 1}})
+rows.append({'name': 'supplied-hits-example', 'exit': 0})
+
+sheets = pack / 'fixtures' / 'demux-inline-se'
+sheet = sheets / 'samples.tsv'
+assert sheet.read_bytes() == b'sample\tbarcode1\tbarcode2\nS1\tACGT\t\nS2\tACGA\t\n'
+for name, records, routing, warning in [
+    ('no-matches', [{'name':'unmatched','seq':'TTTTC','q':[40]*5}], (1, 0, 0, 1),
+     b'0 of 1 input reads assigned to a sample (1 unassigned, 0 ambiguous)'),
+    ('matched', [{'name':'matched','seq':'ACGTC','q':[40]*5}], (1, 1, 0, 0), None),
+    ('empty', [], (0, 0, 0, 0), None),
+]:
+    fq = out / f'demux-{name}.fq'
+    write_records(fq, records)
+    d = out / f'demux-warning-{name}'
+    d, z = run(d.name, ['demux','--r1',str(fq),'--samples',str(sheet),
+                       '--barcode-source','inline','--barcode-r1','1:4','--threads','1',
+                       '--out-dir',str(d/'samples'),'--unassigned1',str(d/'unassigned.fq'),
+                       '--report',str(d/'report.json')])
+    report = json.loads((d/'report.json').read_text())
+    assert report['status'] == 'complete'
+    assert report['demux']['routing'] == dict(zip(
+        ('input_units','routed_units','ambiguous_units','unassigned_units'), routing))
+    if warning:
+        assert warning in z.stderr and read_records(d/'unassigned.fq') == records
+    else:
+        assert b'demux warning:' not in z.stderr
+
 (out/'receipt.json').write_text(json.dumps({'status':'VALIDATED','calls':rows,'scope':'portable authored CLI/module/case smoke; not full qualification'},indent=2)+'\n');print(json.dumps({'status':'VALIDATED','CLI_calls_including_help':len(rows),'help_calls':7,'product_calls':len(rows)-7}))

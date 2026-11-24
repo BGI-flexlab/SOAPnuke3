@@ -348,6 +348,10 @@ impl RunPlan {
         self.api_spec.as_ref().map_or(self.interleaved || self.inputs.len() == 2, |s| s.layout != crate::job_api::Layout::Se)
     }
 
+    pub fn effective_tail_min(&self) -> Option<usize> {
+        (self.tail_mask != 0 || self.process.srna_reject_poly_a).then_some(self.tail_min)
+    }
+
     pub fn provenance(&self) -> serde_json::Value {
         let p = &self.process;
         let mut values = serde_json::json!({
@@ -369,7 +373,7 @@ impl RunPlan {
             "cut-r2":if self.paired() {Some(format!("{},{}",self.cuts[1][0],self.cuts[1][1]))} else {None},
             "quality-mode":self.quality_mode,"quality-q":self.quality_q,
             "quality-window":if self.quality_mode=="window" {Some(self.quality_window)} else {None},
-            "tail-bases":self.tail_bases,"tail-min":if self.tail_mask!=0 {Some(self.tail_min)} else {None},
+            "tail-bases":self.tail_bases,"tail-min":self.effective_tail_min(),
             "stage-order":self.stage_order.map(|s|s.name()).join(",")
         });
         values["adapter5-r1"] = serde_json::json!(p.primers[0]);

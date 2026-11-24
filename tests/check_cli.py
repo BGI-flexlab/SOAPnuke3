@@ -179,6 +179,41 @@ for n,args in enumerate(commands,1):
     reports=[p for p in folder.rglob('*.json') if p.name not in ('command.json','terminal.json')]
     assert len(reports)==1 and json.loads(reports[0].read_text())['status']=='complete'
 
+srna_input = fixture / 'srna-poly-a.fq'
+srna_records = [
+    {'name': name, 'seq': seq, 'q': [40] * len(seq)}
+    for name, seq in [
+        ('raw-upper', 'CGTAGATCGAAAAAAAA'),
+        ('raw-lower', 'CGTAGATCGaaaaaaaa'),
+        ('raw-mixed', 'CGTAGATCGAaAaAaAa'),
+        ('raw-below-threshold', 'CGTAGATCGAAAAAAA'),
+        ('insert-tail', 'CGTAAAAAAAAAGATCG'),
+    ]
+]
+write_records(srna_input, srna_records)
+srna_options = ['--profile','srna','--adapter3-r1','AGATCG','--adapter-min-overlap','6',
+                '--adapter-max-error','0','--srna-reject-poly-a','--r1',str(srna_input),
+                '--out1','clean.fq','--reject1','reject.fq','--report','report.json','-T1']
+srna_config = out / 'srna-config.json'
+srna_config.write_text(json.dumps({'job':'process','options':{'tail-min':8}}))
+for origin, threshold_args in [('cli', ['--tail-min','8']), ('config', ['--config',str(srna_config)])]:
+    case = 'srna-tail-min-' + origin
+    run(case, ['process', *srna_options, *threshold_args])
+    folder = out / case
+    assert read_records(folder / 'reject.fq') == srna_records[:3]
+    clean = [
+        {**row, 'seq': row['seq'][:n], 'q': row['q'][:n]}
+        for row, n in zip(srna_records[3:], (3, 11))
+    ]
+    assert read_records(folder / 'clean.fq') == clean
+    report = json.loads((folder / 'report.json').read_text())
+    assert report['status'] == 'complete'
+    assert report['disposition']['predicates']['srna-polyA']['failed'] == 3
+    assert report['processing']['srna']['tail_min'] == report['settings']['effective']['tail_min'] == 8
+    assert report['settings']['provenance']['resolved_options']['tail-min'] == {
+        'explicit': True, 'origin': origin, 'value': 8,
+    }
+
 manifest={str(p.relative_to(fixture)):hashlib.sha256(p.read_bytes()).hexdigest() for p in fixture.iterdir()}
 (out/'fixture-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')
 (out/'summary.json').write_text(json.dumps({'status':'PASS','invocations':len(rows),'canonical_options_documented':len(allowed),'runs':rows},indent=2)+'\n')

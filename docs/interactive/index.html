@@ -830,7 +830,7 @@ INFO.adapters[0]='Trim supplied or inferred adapters from ordinary SE or PE read
 INFO.quality[2]='Window cuts at the first low-average region; Mott-style keeps a maximum positive sum(Q − cutoff) interval, not BWA/MAXINFO.';
 INFO.screen[2]='Exact canonical k-mers are not alignments. Supplied hit decisions and their provenance must be generated outside SOAPnuke.';
 INFO.sampling[0]='Keep a reproducible share of accepted reads or pairs; the output count is not fixed.';
-INFO.srnaEvidence[0]='In the SE small-RNA profile, require a 3′ adapter and check the insert before trimming. Ordinary SE/PE also support 3′ trimming.';
+INFO.srnaEvidence[0]='In the SE small-RNA profile, require a 3′ adapter and check the insert before trimming. The optional poly-A check counts A or a at the raw read’s 3′ end before trimming. Ordinary SE/PE also support 3′ trimming.';
 INFO.uInput[2]='Exact sequence duplicates do not identify PCR or molecular duplicates. PE keys retain mate order; case is ignored.';
 INFO.rRender[2]='MultiQC custom-content output needs no dedicated parser. MGnify compatibility covers RawR inputs, not a whole downstream workflow.';
 OPTION_INDEX.process.adapters.push(['--adapter-overlap [BOOL]','Optional paired-end adapter clipping from a unique full mate overlap and matching supplied adapter prefixes on both mates. Default OFF. Requires trim action and unchanged read starts before adapters.']);

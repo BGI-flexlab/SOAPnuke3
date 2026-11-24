@@ -26,3 +26,6 @@ this example.
 The single-end file contains 60 C bases followed by `AGATCGGAAGAGC`, all at Q40.
 The README's adapter-trimming command retains exactly the 60 C bases when this
 file is supplied as `reads.fq.gz`.
+
+For an example using an external screening decision for each original mate,
+see [paired-end supplied hits](supplied-hits/README.md).
