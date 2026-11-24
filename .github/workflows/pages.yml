@@ -8,33 +8,63 @@ on:
       - '.github/workflows/pages.yml'
   workflow_dispatch:
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
-
 concurrency:
   group: pages
   cancel-in-progress: false
 
 jobs:
-  deploy:
+  upload:
     runs-on: ubuntu-latest
-    environment:
-      name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: read
+    outputs:
+      artifact_id: ${{ steps.upload.outputs.artifact_id }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Configure Pages
         uses: actions/configure-pages@v5
       - name: Upload the guide
+        id: upload
         uses: actions/upload-pages-artifact@v3
         with:
           path: docs/interactive
+  deploy:
+    needs: upload
+    runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Wait for the uploaded artifact to be visible
+        timeout-minutes: 2
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ARTIFACT_ID: ${{ needs.upload.outputs.artifact_id }}
+        run: |
+          test -n "$ARTIFACT_ID"
+          artifacts="repos/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID/artifacts?name=github-pages"
+          for attempt in {1..12}; do
+            if gh api "$artifacts" | jq -e --arg id "$ARTIFACT_ID" \
+              '.artifacts | any((.id | tostring) == $id and .expired == false)' >/dev/null; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Pages artifact $ARTIFACT_ID is missing from this workflow run" >&2
+          exit 1
       - name: Deploy the guide
         id: deployment
         uses: actions/deploy-pages@v5
+      - name: Checkout
+        uses: actions/checkout@v4
       - name: Verify published files
         timeout-minutes: 5
         env:

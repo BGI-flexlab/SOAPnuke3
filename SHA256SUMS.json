@@ -10,7 +10,7 @@
     ".gitattributes": "9973a7ffee7ff7f6e6e4245c209ac4c928cf51b3cf3c43ed8b029227062472f5",
     ".github/workflows/conda.yml": "0485143d76417291d95d1a9818d688e84971f139c9a0ba5786e712abffa090ff",
     ".github/workflows/linux-arm64.yml": "dcd6fd47f70b1504d8fc2e3915e2d028af4e9cf2baff9db12154d4c963d8977f",
-    ".github/workflows/pages.yml": "7fdbef9829560f92be4eee43e4de629ad8a00affeaacf891274a0cb45040f505",
+    ".github/workflows/pages.yml": "d2082b8f35526c9fec522b4d2269ea048690d22446c6448624d670da17d6f9c8",
     ".github/workflows/publish-linux-packages.yml": "b09fcd9b0f7f7e3f5f0c507c12ac4d6b73c5f62d64ec9fb8b3df955068b00e74",
     ".gitignore": "4c960c1f25db7d723908d1cbdfab4018da50987a1aeb2d095ca5851ec0977c27",
     "CHANGELOG.md": "36953b05b26765d864ff195f1988375992b4524e9b6c1c2ef4e0e7735a3f61c4",
