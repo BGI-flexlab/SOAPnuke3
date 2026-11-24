@@ -16,7 +16,20 @@ This repository is separate from [SOAPnuke v1/v2](https://github.com/BGI-flexlab
 
 ## Install or build
 
-SOAPnuke 3.0.0 is available from Bioconda on Linux x86-64 and ARM64.
+### Download SOAPnuke 3.0.1 for Linux
+
+Choose the archive that matches the output of `uname -m`.
+
+| Linux machine | Download |
+|---|---|
+| `x86_64` (Intel/AMD) | [SOAPnuke 3.0.1 for Linux x86-64](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.1/SOAPnuke-3.0.1-linux-x86_64.tar.gz) |
+| `aarch64` (ARM64 server) | [SOAPnuke 3.0.1 for Linux ARM64](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.1/SOAPnuke-3.0.1-linux-aarch64.tar.gz) |
+
+Extract the archive, enter its directory and run `./bin/SOAPnuke --version`. The first line should read `SOAPnuke 3.0.1`. Add its `bin` directory to your `PATH` to run the quick-start command below. The ARM64 executable requires glibc 2.39 or newer, the C++ runtime and zlib. On older Linux systems, build from source. [Release notes and checksums](https://github.com/BGI-flexlab/SOAPnuke3/releases/tag/v3.0.1)
+
+### Install with Bioconda
+
+Bioconda currently provides **3.0.0** for Linux x86-64 and ARM64. The **3.0.1** update has passed both platform checks and awaits maintainer approval. To use the 3.0.1 fixes now, choose a GitHub download above. [Published packages](https://anaconda.org/bioconda/soapnuke3/files) · [3.0.1 recipe status](https://github.com/bioconda/bioconda-recipes/pull/72159)
 
 ```sh
 conda create -n soapnuke3 --override-channels --strict-channel-priority -c conda-forge -c bioconda soapnuke3=3.0.0
@@ -24,18 +37,9 @@ conda activate soapnuke3
 SOAPnuke --version
 ```
 
-See the [published Bioconda builds](https://anaconda.org/bioconda/soapnuke3/files) and the [Conda installation guide](docs/BUILDING.md#install-with-conda).
+### Build 3.0.1 from source
 
-For a standalone executable, choose the download matching `uname -m`:
-
-| Linux machine | Download |
-|---|---|
-| `x86_64` (Intel/AMD) | [Linux x86-64 executable](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.1/SOAPnuke-3.0.1-linux-x86_64.tar.gz) |
-| `aarch64` (ARM64 server) | [Linux ARM64 executable](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.1/SOAPnuke-3.0.1-linux-aarch64.tar.gz) |
-
-Extract the archive and run `./bin/SOAPnuke --version` inside it. The [release page](https://github.com/BGI-flexlab/SOAPnuke3/releases/tag/v3.0.1) also includes source, checksums and release notes. The ARM64 download is tested natively on Ubuntu 24.04 and requires **glibc 2.39+** plus the C++ runtime and zlib. Build from source on older Linux systems. Linux ARM64 is not a macOS or 32-bit ARM build.
-
-For source builds, use Rust/Cargo 1.99.1, C, C++17, CMake, Make and zlib development headers. Python 3.10+ is needed for build identity and tests. A minimum Rust version has not been established. Locked Rust dependencies, libdeflate and rapidgzip sources are included; Cargo downloads and submodule initialization are unnecessary. Follow the [step-by-step Linux ARM64 instructions](docs/BUILDING.md#linux-arm64-source-build), or use the same native build commands on Linux x86-64:
+Extract the [3.0.1 source archive](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.1/SOAPnuke-3.0.1-source.tar.gz) and run the following commands from its top-level directory. The tested toolchain uses Rust/Cargo 1.99.1, C, C++17, CMake, Make, Python 3.10+ and zlib development headers. The archive includes the locked Rust dependencies, libdeflate and rapidgzip.
 
 ```sh
 make JOBS=2
@@ -43,7 +47,7 @@ make JOBS=2
 export PATH="$PWD/target/release:$PATH"
 ```
 
-See [building and tests](docs/BUILDING.md). Build jobs and processing threads are separate settings. Portable or byte-identical binary rebuilds are not promised.
+See the [build guide](docs/BUILDING.md#linux-arm64-source-build) for ARM64 setup and the linker setting needed when running the Rust API example tests from the 3.0.1 source archive.
 
 ## Quick start
 
@@ -66,7 +70,9 @@ The JSON report is `clean-output/SOAPnuke.json`. These thresholds are examples, 
 - Adapter FASTA accepts A/C/G/T in either case. Reference FASTA retains its IUPAC alphabet, but only canonical windows match.
 - Paired-end `--adapter-overlap` is optional and off by default. It requires supplied 3′ adapters for both mates and a unique, supported overlap. See [adapter and processing rules](docs/USAGE.md).
 - A resource catalogue is optional for direct adapter/reference paths. `id:ID` and the `resources` actions require an explicit catalogue. Nothing is downloaded or selected implicitly.
-- `dedup` needs the full input and a scratch directory. Exact sequence equality is a computational duplicate definition, not molecular duplicate truth.
+- With `--profile srna --srna-reject-poly-a`, `process` counts consecutive `A` or `a` bases immediately before the selected 3′ adapter. A run of `--tail-min` bases or longer rejects the read. [Small-RNA rules](docs/USAGE.md#small-rna-profile)
+- `dedup` groups reads by exact sequence and needs the full input and a scratch directory. Matching sequences alone cannot establish that two reads came from the same original molecule. In 3.0.1 the output files can be on a different filesystem from the scratch directory.
+- `demux` warns if it processes reads or pairs but assigns none to a sample. [3.0.1 changelog](CHANGELOG.md#301)
 
 ## HG002 whole-genome benchmark
 
@@ -115,6 +121,8 @@ All measurements used a shared dual-socket Xeon Gold 6442Y host and Lustre stora
 - [Process and algorithm guide](docs/USAGE.md), [Demux/Dedup/report guide](docs/JOBS.md), [Rust API](docs/API.md), [resources](docs/RESOURCES.md), [architecture](docs/ARCHITECTURE.md)
 - [Build and test](docs/BUILDING.md), [dependency integration](docs/DEPENDENCY-INTEGRATION.md), [validation scope](docs/VALIDATION.md), [changes](CHANGELOG.md)
 - Complete help: [process](docs/process-help.txt), [demux](docs/demux-help.txt), [dedup](docs/dedup-help.txt), [report](docs/report-help.txt), [resources](docs/resources-help.txt)
+
+On the current `main` branch, run the maintained suite with
 
 ```sh
 make test JOBS=2 TEST_THREADS=2
