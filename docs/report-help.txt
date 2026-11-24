@@ -1,4 +1,4 @@
-SOAPnuke 3.0.0 report - Render or export a saved QC report
+SOAPnuke 3.0.1 report - Render or export a saved QC report
 
 Usage:
   SOAPnuke report --input-report JSON --html-report FILE [--tsv FILE]

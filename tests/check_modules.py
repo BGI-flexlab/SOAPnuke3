@@ -21,7 +21,7 @@ def process(name,inputs,extra=(),expected=None):
  return d,v
 for name,argv in [('version',['--version']),('top',['--help']),*[(n,[n,'--help'])for n in ['process','demux','dedup','report','resources']]]:
  d,z=run('help-'+name,argv)
- if name=='version':assert z.stdout.splitlines()[0]==b'SOAPnuke 3.0.0'
+ if name=='version':assert z.stdout.splitlines()[0]==b'SOAPnuke 3.0.1'
  if name=='process':assert b'--resource-catalog JSON'in z.stdout
 se=read_records(fixture/'query-lower.fq');saved,v=process('ordinary-SE',[fixture/'query-lower.fq'],expected={'r1.fq':se});qc(v,'accepted',se)
 p1=repo/'examples/reads_R1.fq.gz';p2=repo/'examples/reads_R2.fq.gz';all1=read_records(p1);all2=read_records(p2);names={'quality-equal','fraction-equal','n-equal'};expected={'r1.fq':[r for r in all1 if r['name'].split('/')[0]in names],'r2.fq':[r for r in all2 if r['name'].split('/')[0]in names]}

@@ -1,4 +1,4 @@
-SOAPnuke 3.0.0 process - FASTQ processing and quality control
+SOAPnuke 3.0.1 process - FASTQ processing and quality control
 
 Usage:
   SOAPnuke process -1 FILE [-2 FILE] -C FILE [-D FILE] -o DIR [options]

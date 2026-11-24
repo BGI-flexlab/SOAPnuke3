@@ -1,4 +1,4 @@
-SOAPnuke 3.0.0 resources - Inspect and verify local adapter/reference files
+SOAPnuke 3.0.1 resources - Inspect and verify local adapter/reference files
 
 Usage:
   SOAPnuke resources list --resource-catalog JSON

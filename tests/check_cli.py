@@ -66,7 +66,7 @@ for label, args in [('top',[]),('top-long',['--help']),('top-short',['-h']),
     p=run(label,args)
     assert not p.stderr
     if 'version' in label:
-        assert p.stdout.decode().splitlines()[0] == 'SOAPnuke 3.0.0'
+        assert p.stdout.decode().splitlines()[0] == 'SOAPnuke 3.0.1'
     if label.startswith(('help','top')):assert max(map(len,p.stdout.decode().splitlines()))<=79
 top=(out/'top/stdout.txt').read_text()
 help_text=(out/'help/stdout.txt').read_text()

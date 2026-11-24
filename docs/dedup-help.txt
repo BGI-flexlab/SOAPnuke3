@@ -1,4 +1,4 @@
-SOAPnuke 3.0.0 dedup - Keep stable representatives of identical sequences
+SOAPnuke 3.0.1 dedup - Keep stable representatives of identical sequences
 
 Usage:
   SOAPnuke dedup --r1 FILE [--r2 FILE] --out1 FILE [--out2 FILE]

@@ -1,4 +1,4 @@
-SOAPnuke 3.0.0 - FASTQ processing and quality control
+SOAPnuke 3.0.1 - FASTQ processing and quality control
 
 Usage:
   SOAPnuke <command> [options]

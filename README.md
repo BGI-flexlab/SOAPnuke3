@@ -1,4 +1,4 @@
-# SOAPnuke 3.0.0
+# SOAPnuke 3.0.1
 
 SOAPnuke processes short-read FASTQ data with a Rust core and native compression libraries. It provides five commands and an owned Rust library.
 
@@ -16,7 +16,7 @@ This repository is separate from [SOAPnuke v1/v2](https://github.com/BGI-flexlab
 
 ## Install or build
 
-On Linux x86-64 or ARM64, install the `soapnuke3` package from Bioconda:
+SOAPnuke 3.0.0 is available from Bioconda on Linux x86-64 and ARM64.
 
 ```sh
 conda create -n soapnuke3 --override-channels --strict-channel-priority -c conda-forge -c bioconda soapnuke3=3.0.0
@@ -30,10 +30,10 @@ For a standalone executable, choose the download matching `uname -m`:
 
 | Linux machine | Download |
 |---|---|
-| `x86_64` (Intel/AMD) | [Linux x86-64 executable](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/SOAPnuke-3.0.0-linux-x86_64.tar.gz) |
-| `aarch64` (ARM64 server) | [Linux ARM64 executable](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/SOAPnuke-3.0.0-linux-aarch64.tar.gz) |
+| `x86_64` (Intel/AMD) | [Linux x86-64 executable](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.1/SOAPnuke-3.0.1-linux-x86_64.tar.gz) |
+| `aarch64` (ARM64 server) | [Linux ARM64 executable](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.1/SOAPnuke-3.0.1-linux-aarch64.tar.gz) |
 
-Extract the archive and run `./bin/SOAPnuke --version` inside it. Checksums are on the [release page](https://github.com/BGI-flexlab/SOAPnuke3/releases/tag/v3.0.0). The ARM64 download is tested natively on Ubuntu 24.04 and requires **glibc 2.39+** plus the C++ runtime and zlib. Build from source on older Linux systems. Linux ARM64 is not a macOS or 32-bit ARM build.
+Extract the archive and run `./bin/SOAPnuke --version` inside it. The [release page](https://github.com/BGI-flexlab/SOAPnuke3/releases/tag/v3.0.1) also includes source, checksums and release notes. The ARM64 download is tested natively on Ubuntu 24.04 and requires **glibc 2.39+** plus the C++ runtime and zlib. Build from source on older Linux systems. Linux ARM64 is not a macOS or 32-bit ARM build.
 
 For source builds, use Rust/Cargo 1.99.1, C, C++17, CMake, Make and zlib development headers. Python 3.10+ is needed for build identity and tests. A minimum Rust version has not been established. Locked Rust dependencies, libdeflate and rapidgzip sources are included; Cargo downloads and submodule initialization are unnecessary. Follow the [step-by-step Linux ARM64 instructions](docs/BUILDING.md#linux-arm64-source-build), or use the same native build commands on Linux x86-64:
 

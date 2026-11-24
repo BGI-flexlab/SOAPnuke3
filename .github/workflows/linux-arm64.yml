@@ -12,8 +12,6 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: v3.0.0
       - name: Install build tools
         run: |
           sudo apt-get update -qq
@@ -21,6 +19,8 @@ jobs:
           rustup toolchain install 1.99.1 --profile minimal
           rustup default 1.99.1
       - name: Build and test the release source
+        id: test
+        shell: bash
         run: |
           mkdir -p .scratch/tmp .scratch/arm64-evidence
           export TMPDIR="$GITHUB_WORKSPACE/.scratch/tmp"
@@ -28,20 +28,30 @@ jobs:
           test "$(uname -m)" = aarch64
           make test JOBS=2 TEST_THREADS=2 2>&1 | tee .scratch/arm64-evidence/tests.log
           ./target/release/SOAPnuke --version | tee .scratch/arm64-evidence/version.txt
+          read -r tool version < .scratch/arm64-evidence/version.txt
+          test "$tool" = SOAPnuke
+          if [ "$GITHUB_REF_TYPE" = tag ]; then
+            test "$GITHUB_REF_NAME" = "v$version"
+          fi
+          echo "version=$version" >> "$GITHUB_OUTPUT"
           file target/release/SOAPnuke | tee .scratch/arm64-evidence/file.txt
           ldd target/release/SOAPnuke | tee .scratch/arm64-evidence/libraries.txt
           cp .scratch/build/*manifest.json .scratch/arm64-evidence/
       - name: Package tested executable
+        env:
+          RELEASE_VERSION: ${{ steps.test.outputs.version }}
         run: |
-          package=SOAPnuke-3.0.0-linux-aarch64
+          package=SOAPnuke-$RELEASE_VERSION-linux-aarch64
           mkdir -p ".scratch/package/$package/bin"
           cp target/release/SOAPnuke ".scratch/package/$package/bin/"
           cp COPYING THIRD_PARTY.md ".scratch/package/$package/"
           python3 - <<'PY'
+          import os
           from pathlib import Path
           import shutil
           root = Path.cwd()
-          package = root / '.scratch/package/SOAPnuke-3.0.0-linux-aarch64'
+          version = os.environ['RELEASE_VERSION']
+          package = root / '.scratch/package' / f'SOAPnuke-{version}-linux-aarch64'
           for folder in ['vendor', 'soapnuke-rs/third_party']:
               for path in (root / folder).rglob('*'):
                   if path.is_file() and path.name.upper().startswith(('LICENSE', 'COPYING', 'NOTICE')):
@@ -49,7 +59,7 @@ jobs:
                       target.parent.mkdir(parents=True, exist_ok=True)
                       shutil.copy2(path, target)
           (package / 'README.txt').write_text(
-              'SOAPnuke 3.0.0 for Linux ARM64 (aarch64)\n\n'
+              f'SOAPnuke {version} for Linux ARM64 (aarch64)\n\n'
               'Built and functionally tested natively on Ubuntu 24.04 ARM64.\n'
               'Requires glibc, libstdc++, libgcc_s and zlib from the system.\n'
               'This is not a macOS, 32-bit ARM or x86 executable.\n\n'
@@ -64,7 +74,7 @@ jobs:
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: soapnuke-3.0.0-linux-aarch64
+          name: soapnuke-arm64
           include-hidden-files: true
           path: |
             .scratch/package/*.tar.gz

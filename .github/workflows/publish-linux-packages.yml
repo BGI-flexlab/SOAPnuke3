@@ -3,6 +3,9 @@ name: Publish tested Linux packages
 on:
   workflow_dispatch:
     inputs:
+      release_tag:
+        description: Existing release tag (for example v3.0.1)
+        required: true
       run_id:
         description: Successful ARM64 or Conda build run in this repository
         required: true
@@ -25,6 +28,7 @@ jobs:
       GH_REPO: ${{ github.repository }}
       BUILD_RUN: ${{ inputs.run_id }}
       PACKAGE_KIND: ${{ inputs.kind }}
+      RELEASE_TAG: ${{ inputs.release_tag }}
     steps:
       - name: Download successful build artifacts
         run: |
@@ -32,26 +36,36 @@ jobs:
           export TMPDIR="$GITHUB_WORKSPACE/.scratch/tmp"
           gh api "repos/$GH_REPO/actions/runs/$BUILD_RUN" > .scratch/run.json
           python3 - <<'PY'
-          import json, os
+          import json, os, re, subprocess
           from pathlib import Path
           run = json.loads(Path('.scratch/run.json').read_text())
           expected = {'arm64': 'Build and test Linux ARM64', 'conda': 'Build and test Conda packages'}
+          tag = os.environ['RELEASE_TAG']
+          assert re.fullmatch(r'v\d+\.\d+\.\d+', tag), tag
           assert run['conclusion'] == 'success'
           assert run['name'] == expected[os.environ['PACKAGE_KIND']]
           assert run['repository']['full_name'] == os.environ['GH_REPO']
+          if os.environ['PACKAGE_KIND'] == 'arm64':
+              repo = os.environ['GH_REPO']
+              sha = subprocess.check_output(
+                  ['gh', 'api', f'repos/{repo}/commits/{tag}', '--jq', '.sha'], text=True
+              ).strip()
+              assert run['head_sha'] == sha, (run['head_sha'], sha)
           PY
           gh run download "$BUILD_RUN" --dir .scratch/artifacts
-      - name: Publish additional 3.0.0 assets without replacing existing files
+      - name: Publish additional release assets
         run: |
           python3 - <<'PY'
           import hashlib, json, os, subprocess
           from pathlib import Path
           root = Path('.scratch/artifacts')
+          tag = os.environ['RELEASE_TAG']
+          version = tag[1:]
           if os.environ['PACKAGE_KIND'] == 'arm64':
-              files = list(root.rglob('SOAPnuke-3.0.0-linux-aarch64.tar.gz'))
+              files = list(root.rglob(f'SOAPnuke-{version}-linux-aarch64.tar.gz'))
               assert len(files) == 1
           else:
-              files = list(root.rglob('soapnuke3-3.0.0-*.conda'))
+              files = list(root.rglob(f'soapnuke3-{version}-*.conda'))
               assert len(files) == 2
           checksums = []
           for path in files:
@@ -64,6 +78,6 @@ jobs:
               suffix += '-build' + builds.pop()
           checksum = Path('.scratch') / ('SHA256SUMS-' + suffix)
           checksum.write_text('\n'.join(checksums) + '\n')
-          subprocess.run(['gh', 'release', 'upload', 'v3.0.0', *map(str, files), str(checksum)], check=True)
+          subprocess.run(['gh', 'release', 'upload', tag, *map(str, files), str(checksum)], check=True)
           print('\n'.join(checksums))
           PY

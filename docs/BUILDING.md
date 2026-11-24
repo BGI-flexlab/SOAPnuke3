@@ -56,7 +56,7 @@ Verify the installation with `SOAPnuke --version` and `SOAPnuke process --help`.
 
 Build natively on the ARM64 server. `uname -m` should print `aarch64` (also called ARM64); an x86-64 executable cannot run natively there. Linux ARM64 support does not imply macOS or 32-bit ARM support.
 
-The 3.0.0 source passed `make test` on a [native Ubuntu 24.04 ARM64 runner](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41795521134), including the slow test, command-line checks and owned-library examples. The [ARM64 download](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.0/SOAPnuke-3.0.0-linux-aarch64.tar.gz) comes from that successful build. It requires glibc 2.39+, `GLIBCXX_3.4.30`, `CXXABI_1.3.13`, and zlib; compile natively on an older system instead. This establishes functional build support, not ARM performance or scaling claims.
+The [3.0.1 ARM64 download](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.1/SOAPnuke-3.0.1-linux-aarch64.tar.gz) is built and tested with `make test` on Ubuntu 24.04 ARM64. It requires glibc 2.39+, the C++ runtime and zlib. Compile natively on older systems.
 
 On Ubuntu 24.04 ARM64, install the system build tools:
 
@@ -69,7 +69,7 @@ Install [Rust with rustup](https://rust-lang.org/tools/install/) if it is not al
 
 ```sh
 rustup toolchain install 1.99.1 --profile minimal
-git clone --depth 1 https://github.com/BGI-flexlab/SOAPnuke3.git
+git clone --depth 1 --branch v3.0.1 https://github.com/BGI-flexlab/SOAPnuke3.git
 cd SOAPnuke3
 rustup run 1.99.1 make JOBS=2
 rustup run 1.99.1 make test JOBS=2 TEST_THREADS=2
@@ -77,7 +77,7 @@ rustup run 1.99.1 make test JOBS=2 TEST_THREADS=2
 export PATH="$PWD/target/release:$PATH"
 ```
 
-The same commands build natively on Linux x86-64. `JOBS` controls build concurrency, not the runtime `--threads` option. Cargo uses the vendored dependencies without downloading crates. The system tools and Rust installation need network access unless already installed. Use a fresh source directory for each architecture; cross-compilation is not the documented route. The maintained checkout includes a synchronization-only unit-test fix also applied by the Conda recipe; processing behavior is unchanged. The original 3.0.0 tag and source archive are preserved.
+The same commands build natively on Linux x86-64. `JOBS` controls build concurrency, not the runtime `--threads` option. Cargo uses the vendored dependencies without downloading crates. The system tools and Rust installation need network access unless already installed. Use a fresh source directory for each architecture; cross-compilation is not the documented route.
 
 ## Conda package builds
 

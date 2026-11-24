@@ -1,4 +1,4 @@
-SOAPnuke 3.0.0 demux - Route FASTQ reads to samples by barcode
+SOAPnuke 3.0.1 demux - Route FASTQ reads to samples by barcode
 
 Usage:
   SOAPnuke demux --r1 FILE [--r2 FILE] --samples TSV [barcode options]
