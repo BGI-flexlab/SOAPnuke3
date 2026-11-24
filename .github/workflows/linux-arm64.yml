@@ -2,6 +2,10 @@ name: Build and test Linux ARM64
 
 on:
   workflow_dispatch:
+    inputs:
+      source_ref:
+        description: Release tag to check out
+        required: true
 
 permissions:
   contents: read
@@ -12,6 +16,8 @@ jobs:
     timeout-minutes: 30
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref }}
       - name: Install build tools
         run: |
           sudo apt-get update -qq
@@ -21,18 +27,32 @@ jobs:
       - name: Build and test the release source
         id: test
         shell: bash
+        env:
+          RELEASE_REF: ${{ inputs.source_ref }}
         run: |
           mkdir -p .scratch/tmp .scratch/arm64-evidence
           export TMPDIR="$GITHUB_WORKSPACE/.scratch/tmp"
           { uname -a; rustc -Vv; cc --version; git rev-parse HEAD; } > .scratch/arm64-evidence/platform.txt
           test "$(uname -m)" = aarch64
+          export SOAPNUKE_REAL_RUSTC="$(command -v rustc)"
+          mkdir -p .scratch/arm64-tools
+          cat > .scratch/arm64-tools/rustc <<'SH'
+          #!/usr/bin/env bash
+          for argument in "$@"; do
+            if [ "$argument" = examples/owned_api.rs ]; then
+              exec "$SOAPNUKE_REAL_RUSTC" -C lto=thin "$@"
+            fi
+          done
+          exec "$SOAPNUKE_REAL_RUSTC" "$@"
+          SH
+          chmod +x .scratch/arm64-tools/rustc
+          export PATH="$PWD/.scratch/arm64-tools:$PATH"
           make test JOBS=2 TEST_THREADS=2 2>&1 | tee .scratch/arm64-evidence/tests.log
           ./target/release/SOAPnuke --version | tee .scratch/arm64-evidence/version.txt
           read -r tool version < .scratch/arm64-evidence/version.txt
           test "$tool" = SOAPnuke
-          if [ "$GITHUB_REF_TYPE" = tag ]; then
-            test "$GITHUB_REF_NAME" = "v$version"
-          fi
+          test "$RELEASE_REF" = "v$version"
+          git diff --exit-code
           echo "version=$version" >> "$GITHUB_OUTPUT"
           file target/release/SOAPnuke | tee .scratch/arm64-evidence/file.txt
           ldd target/release/SOAPnuke | tee .scratch/arm64-evidence/libraries.txt
