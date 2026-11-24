@@ -10,7 +10,7 @@ fi
 native_dir="$(dirname -- "$1")"
 export TMPDIR="$root/.scratch/tmp"
 mkdir -p "$TMPDIR"
-exec rustc --edition=2021 -O examples/owned_api.rs \
+exec rustc --edition=2021 -O -C lto=thin examples/owned_api.rs \
   --extern soapnuke_api=target/release/libsoapnuke_api.rlib \
   -L dependency=target/release/deps -L native="$native_dir" \
   -L native="$native_dir/libdeflate" -o target/release/owned-api-example

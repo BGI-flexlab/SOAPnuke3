@@ -56,7 +56,7 @@ Verify the installation with `SOAPnuke --version` and `SOAPnuke process --help`.
 
 Build natively on the ARM64 server. `uname -m` should print `aarch64` (also called ARM64); an x86-64 executable cannot run natively there. Linux ARM64 support does not imply macOS or 32-bit ARM support.
 
-The [3.0.1 ARM64 download](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.1/SOAPnuke-3.0.1-linux-aarch64.tar.gz) is built and tested with `make test` on Ubuntu 24.04 ARM64. It requires glibc 2.39+, the C++ runtime and zlib. Compile natively on older systems.
+The [3.0.1 ARM64 download](https://github.com/BGI-flexlab/SOAPnuke3/releases/download/v3.0.1/SOAPnuke-3.0.1-linux-aarch64.tar.gz) was built and tested with `make test` on [native Ubuntu 24.04 ARM64](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/45357981777). It requires glibc 2.39+, the C++ runtime and zlib. Compile natively on older systems.
 
 On Ubuntu 24.04 ARM64, install the system build tools:
 
@@ -72,9 +72,17 @@ rustup toolchain install 1.99.1 --profile minimal
 git clone --depth 1 --branch v3.0.1 https://github.com/BGI-flexlab/SOAPnuke3.git
 cd SOAPnuke3
 rustup run 1.99.1 make JOBS=2
-rustup run 1.99.1 make test JOBS=2 TEST_THREADS=2
 ./target/release/SOAPnuke --version
 export PATH="$PWD/target/release:$PATH"
+```
+
+For `make test` in the `v3.0.1` tag or source archive on ARM64, use the same
+ThinLTO setting for the separately linked Rust library example as for the
+release library. The current `main` build script already includes this flag.
+
+```sh
+sed -i 's/--edition=2021 -O /--edition=2021 -O -C lto=thin /' scripts/build_api_example.sh
+rustup run 1.99.1 make test JOBS=2 TEST_THREADS=2
 ```
 
 The same commands build natively on Linux x86-64. `JOBS` controls build concurrency, not the runtime `--threads` option. Cargo uses the vendored dependencies without downloading crates. The system tools and Rust installation need network access unless already installed. Use a fresh source directory for each architecture; cross-compilation is not the documented route.

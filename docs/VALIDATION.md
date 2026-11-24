@@ -1,10 +1,14 @@
 # Validation scope
 
-The maintained source test route is `make test JOBS=2 TEST_THREADS=2`. It includes native tests, portable Process and standalone-command CLI suites, the explicit long mutation test and two linked owned-library examples. Authored fixtures are bundled; see [building](BUILDING.md). The [machine-readable release validation summary](validation-summary.json) records the formal build identity, checks and limits. The optional pinned fastp differential check and dependency integration route are documented there.
+The maintained source test route is `make test JOBS=2 TEST_THREADS=2`. It includes native tests, portable Process and standalone-command CLI suites, the explicit long mutation test and two linked owned-library examples. Authored fixtures are bundled. See [building](BUILDING.md) for test commands and source requirements.
+
+## 3.0.1 Linux x86-64 and ARM64 checks
+
+The 3.0.1 release passed 318 regular Rust tests, the separate 120-second test, 52 Process calls, 28 module and help calls, the adapter-overlap integration checks and both linked Rust API examples on Linux x86-64 and native Ubuntu 24.04 ARM64. The small-RNA regression accepted 13 records and rejected eight. Both decoded FASTQs matched the expected records exactly. The native ARM64 run used `-C lto=thin` for the separately linked Rust API example. [Release artifacts and validation receipts](https://github.com/BGI-flexlab/SOAPnuke3/releases/tag/v3.0.1) · [Native ARM64 workflow](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/45357981777)
 
 ## Formal 3.0.0 Linux x86-64 build checks
 
-The formal executable reports build ID `soapnuke-3.0.0` and has SHA256 `17f371826e6b7435a8c017bc95f7762838486f21892e0303451e4b606e0831c8`. Its source manifest SHA256 is `709cb22cbfbb53d057154097e0d649ef0f06b0dc25c78762b0f4dd7af158e813`. These identities distinguish the release build from inherited measurements.
+The formal executable reports build ID `soapnuke-3.0.0` and has SHA256 `17f371826e6b7435a8c017bc95f7762838486f21892e0303451e4b606e0831c8`. Its source manifest SHA256 is `709cb22cbfbb53d057154097e0d649ef0f06b0dc25c78762b0f4dd7af158e813`. These identities distinguish the release build from inherited measurements. See the [3.0.0 machine-readable validation summary](validation-summary.json) for its build identity, checks, optional pinned fastp differential check and dependency integration route.
 
 | Check on this executable | Observed result |
 |---|---|
@@ -20,7 +24,7 @@ This resource check is one paired comparison per cell, not a timing campaign or 
 
 ## Linux ARM64 and Conda packages
 
-The same 3.0.0 source passed the full maintained `make test` route on a [native Ubuntu 24.04 ARM64 runner](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41795521134): 318 normal native tests, the separate 120-second test, portable CLI and adapter-overlap checks, and both linked owned-library examples. The standalone ARM executable has SHA256 `ed3ed5892c49fd42b576d1e43ca5bd1efbc5e362f618b3d14adb3db28e26e5f0`.
+The 3.0.0 source passed 318 normal native tests, the separate 120-second test, and the portable CLI and adapter-overlap checks on a [native Ubuntu 24.04 ARM64 runner](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41795521134). Linking the Rust API example failed in that run. The standalone ARM executable has SHA256 `ed3ed5892c49fd42b576d1e43ca5bd1efbc5e362f618b3d14adb3db28e26e5f0`.
 
 The downloadable [Linux x86-64 and ARM64 Conda packages](https://github.com/BGI-flexlab/SOAPnuke3/actions/runs/41802552250) each passed 318 native tests, portable CLI and adapter-overlap checks, then installation into a fresh Conda test environment with help/version and an actual filtering assertion. The package tests do not include the separately run 120-second test. A scheduling-dependent contention test was fixed by making its workers queue before releasing the sole permit; all original assertions remain. This patch changes only test code. Source algorithms and bundled libraries are unchanged; the native toolchain and runtime-library packaging differ. See [installation and compatibility requirements](BUILDING.md). These platform checks do not extend the x86-64 release's real-data or performance measurements to ARM.
 
