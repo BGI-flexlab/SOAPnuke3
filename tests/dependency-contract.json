@@ -2,7 +2,7 @@
   "schema": "soapnuke-dependency-integration/1",
   "integration_files": {
     ".cargo/config.toml": "77e9219c27274120197571fd165cbe4121963b5ad3bc0b20b383c86ef0ce6c2b",
-    "soapnuke-rs/Cargo.lock": "84ce66d525f5d3bf00093fe1d710cfa66e96faf535aab1c69fed4fab71dcb2b8",
+    "soapnuke-rs/Cargo.lock": "56567a6b26d744c1517d7552f5ca002f8f02508fac191155cc72c2671d785448",
     "soapnuke-rs/third_party/rapidgzip/PINNED_COMMITS.tsv": "ae4da06d1e6bb35b7752cfadcc38ef947e52cb941dba88a301fca96a7ec70eb8",
     "soapnuke-rs/src/rapidgzip_adapter.h": "1a927827d8f5cfda22a4a18819df126d395eabbf3b6fed95a1cbf0f0ce69e792",
     "soapnuke-rs/src/rapidgzip_adapter.cpp": "dc9bb3118436f8ac72bac40d1bf3b2ae6fef4779368b678ff1e21d31c360face",

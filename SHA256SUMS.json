@@ -2129,7 +2129,7 @@
     "tests/check_modules.py": "6c6dcc732a8576742d94a4d749b4794b9de23822782491baf464ddef6a36e57f",
     "tests/common.py": "605950bab56206ae3952809f611ee8b91ed5f1d1094a8a6d294d31bcc83f1c56",
     "tests/compare_fastp.py": "dc6db3ee60a6413a2506c60dfdcb27ea6a1d5e97c8eec29cdd3e3dcd44c8386a",
-    "tests/dependency-contract.json": "8a9934ae539f3ff3880e1aac9391b86e044302e9dbcf424f3eed5d589a4622ee",
+    "tests/dependency-contract.json": "3fb2231021c88e49b23e5d522388bdc7251e9725d24729cc66cae7f4d0a506f5",
     "tests/dependency-manifest.json": "63b5e803a04d319174dde2a05de13827688ec1658a0761aa13c5a090d7a61af4",
     "tests/expected/dedup-se.json": "c5fc238fe972c910563151ab86e06c3171ebccb5f293b797833a6fd358d6b54c",
     "tests/expected/demux-inline-se.json": "882e7705b845f1675ba09df96e328ad2ad8f68c0f97fb28088bc9267617da27f",
