@@ -150,10 +150,14 @@ mates. Use it as a template when converting decisions from another tool.
 `--profile srna` provides a single-end adapter-based flow. Supply an explicit
 3′ adapter with trimming enabled, and choose `--srna-min-insert` as needed.
 Optional controls reject 5′ adapter matches or poly-A runs. With
-`--srna-reject-poly-a`, SOAPnuke counts consecutive `A` or `a` bases at the
-3′ end of the original FASTQ record before adapter trimming. A run of
-`--tail-min` bases or longer rejects the read. A run in the insert followed by
-the adapter does not reach that raw end.
+`--srna-reject-poly-a`, SOAPnuke locates the selected 3′ adapter, then counts
+consecutive `A` or `a` bases **immediately before the adapter**. This is the
+3′ end of the insert that would be written to the clean FASTQ. If the count
+reaches `--tail-min`, SOAPnuke rejects the whole read. For a threshold of 8,
+an insert ending in `CGTAAAAAAAA` fails. Inserts ending in `CGTAAAAAAA`
+or `CGTAAAAAAAACC` pass this check. Bases in or after
+the adapter do not contribute. If the adapter is missing, SOAPnuke records a
+missing-adapter rejection and skips the poly-A check.
 
 This profile has its own processing order. It cannot be combined with ordinary
 fixed/quality/tail trimming, label capture, adapter inference or reference

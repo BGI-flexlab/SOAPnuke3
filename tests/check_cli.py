@@ -179,40 +179,61 @@ for n,args in enumerate(commands,1):
     reports=[p for p in folder.rglob('*.json') if p.name not in ('command.json','terminal.json')]
     assert len(reports)==1 and json.loads(reports[0].read_text())['status']=='complete'
 
-srna_input = fixture / 'srna-poly-a.fq'
-srna_records = [
-    {'name': name, 'seq': seq, 'q': [40] * len(seq)}
-    for name, seq in [
-        ('raw-upper', 'CGTAGATCGAAAAAAAA'),
-        ('raw-lower', 'CGTAGATCGaaaaaaaa'),
-        ('raw-mixed', 'CGTAGATCGAaAaAaAa'),
-        ('raw-below-threshold', 'CGTAGATCGAAAAAAA'),
-        ('insert-tail', 'CGTAAAAAAAAAGATCG'),
-    ]
-]
+srna_input = fixture / 'srna-poly-a.fq.gz'
+srna_records = read_records(work / 'tests/fixtures/srna-insert-poly-a/input.fq')
+# The eight REJECT labels in the user-supplied 21-read fixture.
+poly_a_rejects = {'suffix8', 'entire8', 'suffix12', 'entire12', 'suffix20', 'entire20',
+                  'control0', 'control4'}
+rejects = [row for row in srna_records if row['name'] in poly_a_rejects]
+assert all(row['seq'].endswith(adapter) for row in srna_records)
+assert len(srna_records) == 21 and len(rejects) == 8
+clean = [{**row, 'seq': row['seq'][:-len(adapter)], 'q': row['q'][:-len(adapter)]}
+         for row in srna_records if row['name'] not in poly_a_rejects]
 write_records(srna_input, srna_records)
-srna_options = ['--profile','srna','--adapter3-r1','AGATCG','--adapter-min-overlap','6',
-                '--adapter-max-error','0','--srna-reject-poly-a','--r1',str(srna_input),
-                '--out1','clean.fq','--reject1','reject.fq','--report','report.json','-T1']
+srna_options = ['--profile','srna','--adapter3-r1',adapter,'--srna-reject-poly-a=true',
+                '-1',str(srna_input),'-o','.','-C','clean.fq.gz',
+                '--reject1','reject.fq.gz','--report','report.json','-T1']
 srna_config = out / 'srna-config.json'
 srna_config.write_text(json.dumps({'job':'process','options':{'tail-min':8}}))
 for origin, threshold_args in [('cli', ['--tail-min','8']), ('config', ['--config',str(srna_config)])]:
     case = 'srna-tail-min-' + origin
     run(case, ['process', *srna_options, *threshold_args])
     folder = out / case
-    assert read_records(folder / 'reject.fq') == srna_records[:3]
-    clean = [
-        {**row, 'seq': row['seq'][:n], 'q': row['q'][:n]}
-        for row, n in zip(srna_records[3:], (3, 11))
-    ]
-    assert read_records(folder / 'clean.fq') == clean
+    assert read_records(folder / 'reject.fq.gz') == rejects
+    assert read_records(folder / 'clean.fq.gz') == clean
     report = json.loads((folder / 'report.json').read_text())
     assert report['status'] == 'complete'
-    assert report['disposition']['predicates']['srna-polyA']['failed'] == 3
+    disposition = report['disposition']
+    assert (disposition['input_units'], disposition['accepted_units'], disposition['rejected_units']) == (21, 13, 8)
+    assert disposition['predicates']['srna-polyA'] == {
+        'enabled': True, 'evaluated': 21, 'failed': 8, 'first_rejected_units': 8,
+        'not_evaluated': 0, 'population': 'original-input', 'stage': 'insert-before-3prime-adapter',
+    }
     assert report['processing']['srna']['tail_min'] == report['settings']['effective']['tail_min'] == 8
     assert report['settings']['provenance']['resolved_options']['tail-min'] == {
         'explicit': True, 'origin': origin, 'value': 8,
     }
+
+edge_sequences = [('poly-a-after-adapter', 'CGT' + adapter + 'A' * 8),
+                  ('poly-a-with-no-adapter', 'CGT' + 'A' * 8),
+                  ('poly-a-before-partial-adapter', 'CGT' + 'A' * 8 + adapter[:4])]
+edge_records = [{'name': name, 'seq': sequence, 'q': [40] * len(sequence)}
+                for name, sequence in edge_sequences]
+edge_input = fixture / 'srna-poly-a-edges.fq'
+write_records(edge_input, edge_records)
+run('srna-poly-a-edge-cases',
+    ['process', '--profile', 'srna', '--adapter3-r1', adapter, '--srna-reject-poly-a',
+     '--tail-min', '8', '-1', str(edge_input), '-o', '.', '-C', 'clean.fq',
+     '--reject1', 'reject.fq', '--report', 'report.json', '-T1'])
+edge_output = out / 'srna-poly-a-edge-cases'
+assert read_records(edge_output / 'clean.fq') == [
+    {'name': 'poly-a-after-adapter', 'seq': 'CGT', 'q': [40] * 3},
+]
+assert read_records(edge_output / 'reject.fq') == edge_records[1:]
+edge_disposition = json.loads((edge_output / 'report.json').read_text())['disposition']
+assert edge_disposition['first_reasons'] == {'srna-missing-3prime': 1, 'srna-polyA': 1}
+edge_poly_a = edge_disposition['predicates']['srna-polyA']
+assert (edge_poly_a['evaluated'], edge_poly_a['failed'], edge_poly_a['not_evaluated']) == (2, 1, 1)
 
 manifest={str(p.relative_to(fixture)):hashlib.sha256(p.read_bytes()).hexdigest() for p in fixture.iterdir()}
 (out/'fixture-manifest.json').write_text(json.dumps(manifest,indent=2)+'\n')

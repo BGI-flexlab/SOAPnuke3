@@ -1063,7 +1063,7 @@ pub fn apply_recorded_ticket(
 mod tests {
     use super::*;
     #[test]
-    fn m7_srna_raw_evidence_atomic_fallback_and_prefix_only() {
+    fn m7_srna_insert_tail_atomic_fallback_and_prefix_only() {
         let mut gp = GlobalParams::new();
         gp.native_m1 = true;
         gp.quality_phred = 33;
@@ -1093,24 +1093,25 @@ mod tests {
             r.qual_seq = "I".repeat(seq.len());
             r
         };
-        for (seq, expected, failed) in [
-            ("AAATTTAAAA", None, [true, false, true, true]),
-            ("TTGGGAAAA", None, [false, true, false, true]),
-            ("TTTTGGG", Some("TTTT"), [false; 4]),
+        let pass = Some(false);
+        let fail = Some(true);
+        for (seq, expected, expected_evidence) in [
+            ("AAATTTAAAA", None, [fail, None, fail, None]),
+            ("TTGGGAAAA", None, [pass, fail, pass, pass]),
+            ("TTAAaGGG", None, [pass, pass, pass, fail]),
+            ("AAAAaGGG", None, [pass, pass, fail, fail]),
+            ("TTTTGGGAAAA", Some("TTTT"), [pass; 4]),
         ] {
             let raw = make(seq);
             let evidence = gp.native_process.srna_evidence(&raw, 3).0;
-            for i in 0..4 {
-                assert_eq!(evidence[i] == Some(true), failed[i]);
-            }
-            if seq == "AAATTTAAAA" {
-                assert_eq!(evidence[1], None);
-            }
+            assert_eq!(evidence, expected_evidence, "{seq}");
             let mut stats = PeLocalStats::new(&gp);
             let mut d = DiagnosticBatch::new(seq.len());
             let out =
                 apply_recorded(vec![raw.clone()], None, &mut stats, &gp, Some(&mut d)).unwrap();
             assert_eq!(stats.raw1.native_qc.as_ref().unwrap().reads, 1);
+            assert_eq!(stats.fs.native.srna_evaluated, expected_evidence.map(|v| u64::from(v.is_some())));
+            assert_eq!(stats.fs.native.srna_failed, expected_evidence.map(|v| u64::from(v == fail)));
             if let Some(expected) = expected {
                 assert_eq!(out.0[0].sequence, expected);
                 assert_eq!(out.0[0].seq_id, raw.seq_id);

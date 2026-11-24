@@ -245,8 +245,9 @@ Small-RNA profile (single-end only):
   --srna-reject5 [BOOL]         Reject 5' adapter matches; needs adapter5-r1.
                                 [false]
   --srna-reject-poly-a [BOOL]   Reject poly-A runs using --tail-min. [false]
-                                Count A/a at the raw read's 3' end before
-                                trimming the adapter.
+                                Count consecutive A/a at the insert's 3' end,
+                                just before the selected 3' adapter match.
+                                Skipped for reads with no 3' adapter match.
   The srna profile uses its own trimming flow. Do not combine it with cuts,
   quality/tail trimming, label capture, inference, or reference filtering.
 

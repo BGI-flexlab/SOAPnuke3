@@ -644,7 +644,8 @@ fn run_impl(plan: &RunPlan, fault: Fault, api_io:Option<std::sync::Arc<crate::na
             let enabled = i < 2
                 || (i == 2 && plan.process.srna_reject5)
                 || (i == 3 && plan.process.srna_reject_poly_a);
-            predicate_accounting[*name] = json!({"enabled":enabled,"evaluated":stats.fs.native.srna_evaluated[i],"failed":stats.fs.native.srna_failed[i],"first_rejected_units":stats.fs.native.srna_first[i],"not_evaluated":if enabled {input.saturating_sub(stats.fs.native.srna_evaluated[i])}else{0},"stage":"original","population":"original-input"});
+            let stage = if *name == "srna-polyA" { "insert-before-3prime-adapter" } else { "original" };
+            predicate_accounting[*name] = json!({"enabled":enabled,"evaluated":stats.fs.native.srna_evaluated[i],"failed":stats.fs.native.srna_failed[i],"first_rejected_units":stats.fs.native.srna_first[i],"not_evaluated":if enabled {input.saturating_sub(stats.fs.native.srna_evaluated[i])}else{0},"stage":stage,"population":"original-input"});
         }
     }
     let mut observed_bytes = Some(0u64);
@@ -817,7 +818,7 @@ fn run_impl(plan: &RunPlan, fault: Fault, api_io:Option<std::sync::Arc<crate::na
         }
     }
     if plan.process.profile == "srna" {
-        report["processing"]["srna"] = json!({"profile":"srna","population":"original-input","stage":"original","evidence_units":stats.fs.native.srna_evaluated[0],"failed_raw_profile_units":stats.fs.native.srna_first.iter().sum::<u64>(),"minimum_insert":plan.process.srna_min_insert,"reject5":plan.process.srna_reject5,"reject_poly_a":plan.process.srna_reject_poly_a,"tail_min":plan.tail_min,"scope":"all available raw evidence evaluated atomically; failures keep originals and do not evaluate later ordinary filters; success keeps original prefix before selected3prime adapter only"});
+        report["processing"]["srna"] = json!({"profile":"srna","population":"original-input","stage":"original","evidence_units":stats.fs.native.srna_evaluated[0],"failed_raw_profile_units":stats.fs.native.srna_first.iter().sum::<u64>(),"minimum_insert":plan.process.srna_min_insert,"reject5":plan.process.srna_reject5,"reject_poly_a":plan.process.srna_reject_poly_a,"tail_min":plan.tail_min,"poly_a_scope":"consecutive A/a immediately before the selected 3prime adapter match; no match means not evaluated","scope":"all available profile evidence evaluated before modifying the read; failures keep originals and do not evaluate later ordinary filters; success keeps original prefix before selected 3prime adapter only"});
         report["settings"]["resolved_operations"] = json!([
             "input_qc",
             "srna_raw_evidence",

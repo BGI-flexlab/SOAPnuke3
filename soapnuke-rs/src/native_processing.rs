@@ -517,28 +517,29 @@ impl ProcessSettings {
         read: &FastqRecord,
         tail_min: usize,
     ) -> ([Option<bool>; 4], Option<crate::native_adapter::Match>) {
+        let sequence = read.sequence.as_bytes();
         let hit = self.matchers[0]
             .as_ref()
-            .and_then(|m| m.best_match(read.sequence.as_bytes()));
+            .and_then(|m| m.best_match(sequence));
         let five = if self.srna_reject5 {
             Some(
                 self.primer_matchers[0]
                     .as_ref()
-                    .is_some_and(|m| m.best_match_anchored(read.sequence.as_bytes()).is_some()),
+                    .is_some_and(|m| m.best_match_anchored(sequence).is_some()),
             )
         } else {
             None
         };
         let poly = if self.srna_reject_poly_a {
-            Some(
-                read.sequence
-                    .as_bytes()
+            hit.map(|adapter| {
+                sequence[..adapter.start]
                     .iter()
                     .rev()
                     .take_while(|&&b| matches!(b, b'A' | b'a'))
+                    .take(tail_min)
                     .count()
-                    >= tail_min,
-            )
+                    == tail_min
+            })
         } else {
             None
         };
