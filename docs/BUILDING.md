@@ -89,7 +89,7 @@ The same commands build natively on Linux x86-64. `JOBS` controls build concurre
 
 ## Conda package builds
 
-The recipe in [`packaging/conda`](../packaging/conda/) builds the immutable 3.0.0 source archive with Conda's Rust/C/C++ compilers and zlib. It applies a test-only synchronization patch so the CPU-permit contention test does not depend on thread scheduling; processing code and assertions are unchanged. The GitHub packages use Conda build number 1. Bioconda publishes 3.0.0 as build 0, using the same source and test patch. The package name is `soapnuke3`; the installed command remains `SOAPnuke`.
+The recipe in [`packaging/conda`](../packaging/conda/) builds the tagged 3.0.1 source archive with Conda's Rust/C/C++ compilers and zlib. It uses build number 0. The package name is `soapnuke3` and the installed command is `SOAPnuke`.
 
 To build a package on either a Linux x86-64 or ARM64 machine, use a current checkout containing the recipe:
 
@@ -101,7 +101,7 @@ export TMPDIR="$PWD/.scratch/tmp"
 python -m conda build packaging/conda --override-channels -c conda-forge \
   --no-anaconda-upload --croot "$PWD/.scratch/conda-bld"
 conda create -n soapnuke3 --override-channels -c conda-forge \
-  -c "file://$PWD/.scratch/conda-bld" soapnuke3=3.0.0
+  -c "file://$PWD/.scratch/conda-bld" soapnuke3=3.0.1
 conda activate soapnuke3
 SOAPnuke --version
 ```
